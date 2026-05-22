@@ -1,0 +1,833 @@
+{%- liquid
+  assign sec_st = section.settings
+  assign section_width = sec_st.section_width
+-%}
+<div
+  id="case-selector-{{ section.id }}"
+  class="case-selector"
+  data-case-selector
+  data-section-id="{{ section.id }}"
+  data-lock-scroll="{% if sec_st.lock_scroll %}true{% else %}false{% endif %}"
+  data-advance-ms="{{ sec_st.advance_duration_ms }}"
+  style="
+    --cs-bg: {{ sec_st.background_color }};
+    --cs-fg: {{ sec_st.text_color }};
+    --cs-accent: {{ sec_st.accent_color }};
+    --cs-side-desktop: {{ sec_st.side_margin_desktop }}px;
+    --cs-side-mobile: {{ sec_st.side_margin_mobile }}px;
+    --cs-mt-desktop: {{ sec_st.margin_top_desktop | default: 0 }}px;
+    --cs-mb-desktop: {{ sec_st.margin_bottom_desktop | default: 0 }}px;
+    --cs-mt-mobile: {{ sec_st.margin_top_mobile | default: 0 }}px;
+    --cs-mb-mobile: {{ sec_st.margin_bottom_mobile | default: 0 }}px;
+    margin-top: {{ sec_st.margin_top_desktop | default: 0 }}px;
+    margin-bottom: {{ sec_st.margin_bottom_desktop | default: 0 }}px;
+  "
+>
+  <div class="case-selector__inner">
+    <div class="case-selector__media">
+      {%- for block in section.blocks -%}
+        {%- if block.settings.image != blank -%}
+          <img
+            class="case-selector__media-img"
+            data-case-media="{{ block.id }}"
+            src="{{ block.settings.image | image_url: width: 1600 }}"
+            alt="{{ block.settings.name | default: 'Case option' | escape }}"
+            loading="lazy"
+            width="{{ block.settings.image.width }}"
+            height="{{ block.settings.image.height }}"
+          >
+        {%- endif -%}
+      {%- endfor -%}
+      {%- if sec_st.default_image != blank -%}
+        <img
+          class="case-selector__media-img case-selector__media-img--default"
+          data-case-media="default"
+          src="{{ sec_st.default_image | image_url: width: 1600 }}"
+          alt="{{ sec_st.heading | escape }}"
+          width="{{ sec_st.default_image.width }}"
+          height="{{ sec_st.default_image.height }}"
+        >
+      {%- endif -%}
+    </div>
+    <div class="case-selector__content">
+      {%- if sec_st.eyebrow != blank -%}
+        <p class="case-selector__eyebrow">{{ sec_st.eyebrow }}</p>
+      {%- endif -%}
+      {%- if sec_st.heading != blank -%}
+        <h2 class="case-selector__heading">{{ sec_st.heading }}</h2>
+      {%- endif -%}
+      {%- if sec_st.description != blank -%}
+        <div class="case-selector__description rte">{{ sec_st.description }}</div>
+      {%- endif -%}
+      {%- if section.blocks.size > 0 -%}
+        <div class="case-selector__swatches" role="radiogroup" aria-label="Case options">
+          {%- for block in section.blocks -%}
+            {%- liquid
+              assign b = block.settings
+            -%}
+            <button
+              type="button"
+              class="case-selector__swatch"
+              role="radio"
+              aria-checked="false"
+              data-case-id="{{ block.id }}"
+              data-case-name="{{ b.name | escape }}"
+              {{ block.shopify_attributes }}
+            >
+              <span class="case-selector__swatch-dot" style="background-color: {{ b.color }};" aria-hidden="true"></span>
+              <span class="case-selector__swatch-label">{{ b.name }}</span>
+            </button>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+      {%- if sec_st.support_link_label != blank -%}
+        <a class="case-selector__support" href="{{ sec_st.support_link_url | default: '#' }}">
+          {{ sec_st.support_link_label }}
+        </a>
+      {%- endif -%}
+      <button type="button" class="case-selector__cta" data-case-cta disabled aria-disabled="true">
+        <span class="case-selector__cta-label">{{ sec_st.cta_label | default: 'Choose Case' }}</span>
+      </button>
+    </div>
+  </div>
+  <!-- Liquid Glass SVG filter: feTurbulence noise + feDisplacementMap distorts
+       the backdrop behind the CTA for real chromatic refraction, not just blur.
+       Used via `backdrop-filter: url(#…)` below. Browsers without SVG-filter
+       backdrop support fall back to the `blur() + saturate()` parts, which is
+       what WebKit/Chrome of the past 2 years do natively. -->
+  <svg aria-hidden="true" focusable="false" width="0" height="0" class="case-selector__glass-defs">
+    <defs>
+      <filter id="case-selector-liquid-glass-{{ section.id }}" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB">
+        <feTurbulence type="fractalNoise" baseFrequency="0.008 0.012" numOctaves="2" seed="7" result="noise"/>
+        <feGaussianBlur in="noise" stdDeviation="4" result="smooth"/>
+        <feDisplacementMap in="SourceGraphic" in2="smooth" scale="14" xChannelSelector="R" yChannelSelector="G"/>
+      </filter>
+    </defs>
+  </svg>
+</div>
+
+{% style %}
+  #case-selector-{{ section.id }} {
+    position: relative;
+    background-color: var(--cs-bg, #ffffff);
+    color: var(--cs-fg, #111111);
+    overflow: visible;
+  }
+  #case-selector-{{ section.id }} .case-selector__inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: stretch;
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+    box-sizing: border-box;
+    gap: 24px;
+    grid-auto-rows: {{ sec_st.card_height }}px;
+  }
+  #case-selector-{{ section.id }} .case-selector__media {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: 14px;
+    overflow: hidden;
+    background-color: #f4f4f4;
+  }
+  #case-selector-{{ section.id }} .case-selector__media-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 450ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  #case-selector-{{ section.id }} .case-selector__media-img.is-active {
+    opacity: 1;
+  }
+  #case-selector-{{ section.id }} .case-selector__content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    padding: 56px 64px;
+    background-color: #EDEEF2;
+    border-radius: 14px;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+  #case-selector-{{ section.id }} .case-selector__eyebrow {
+    font-family: 'Inter', var(--body-font), sans-serif;
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--cs-fg);
+    opacity: 0.6;
+    margin: 0 0 16px;
+  }
+  #case-selector-{{ section.id }} .case-selector__heading {
+    font-family: 'Inter', var(--heading-font), sans-serif;
+    font-weight: 500;
+    font-style: normal;
+    font-size: 40px;
+    line-height: 30px;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+    color: var(--cs-fg);
+    margin: 0 0 24px;
+  }
+  #case-selector-{{ section.id }} .case-selector__description {
+    font-family: 'Inter', var(--body-font), sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 18px;
+    line-height: 24px;
+    letter-spacing: 0;
+    color: var(--cs-fg);
+    opacity: 0.9;
+    margin: 0 0 28px;
+    max-width: 440px;
+  }
+  #case-selector-{{ section.id }} .case-selector__description p {
+    margin: 0 0 12px;
+  }
+  #case-selector-{{ section.id }} .case-selector__description p:last-child {
+    margin-bottom: 0;
+  }
+  #case-selector-{{ section.id }} .case-selector__swatches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 0 0 24px;
+  }
+  /* Swatch = pill with 10px radius. Unselected gets a light-grey border
+     (unmistakeable "not picked yet" look); selected upgrades to a solid
+     1px black border + subtle fill + right-side black dot indicator. */
+  #case-selector-{{ section.id }} .case-selector__swatch {
+    width: 140px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    padding: 0 14px;
+    border: 0.5px solid #7B7B7B;
+    border-radius: 10px;
+    background: transparent;
+    cursor: pointer;
+    font: inherit;
+    color: var(--cs-fg);
+    box-sizing: border-box;
+    transition: background-color 180ms ease, border-color 180ms ease, transform 180ms ease;
+  }
+  #case-selector-{{ section.id }} .case-selector__swatch:hover {
+    border-color: rgba(0, 0, 0, 0.35);
+  }
+  #case-selector-{{ section.id }} .case-selector__swatch.is-selected {
+    border-color: #000000;
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+  /* Right-side selected indicator — a small black filled circle that appears
+     when the swatch is selected. Uses ::after pushed to the right via
+     margin-left:auto since the swatch is display:inline-flex. */
+  #case-selector-{{ section.id }} .case-selector__swatch::after {
+    content: "";
+    flex: 0 0 auto;
+    width: 14px;
+    height: 14px;
+    margin-left: auto;
+    border-radius: 50%;
+    background-color: #000000;
+    opacity: 0;
+    transform: scale(0.6);
+    transition: opacity 180ms ease, transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  #case-selector-{{ section.id }} .case-selector__swatch.is-selected::after {
+    opacity: 1;
+    transform: scale(1);
+  }
+  #case-selector-{{ section.id }} .case-selector__swatch-dot {
+    flex: 0 0 auto;
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.18), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+    transition: transform 180ms ease;
+  }
+  #case-selector-{{ section.id }} .case-selector__swatch.is-selected .case-selector__swatch-dot {
+    transform: scale(1.05);
+  }
+  #case-selector-{{ section.id }} .case-selector__swatch-label {
+    font-family: 'Inter', var(--body-font), sans-serif;
+    font-weight: 400;
+    font-size: 10px;
+    line-height: 12px;
+    letter-spacing: 0;
+    text-align: center;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  #case-selector-{{ section.id }} .case-selector__support {
+    font-family: 'Inter', var(--body-font), sans-serif;
+    font-size: 13px;
+    line-height: 18px;
+    color: var(--cs-fg);
+    opacity: 0.7;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    margin: 0 0 28px;
+  }
+  /* Liquid Glass CTA — 200x50, 42px radius, 5.29px edge, 4% fill, real
+     chromatic refraction via SVG filter + backdrop blur, layered gradients
+     for specular highlight, animated light sweep on hover. */
+  .case-selector__glass-defs {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  #case-selector-{{ section.id }} .case-selector__cta {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 200px;
+    height: 50px;
+    padding: 0;
+    border: 0;
+    border-radius: 42px;
+    color: var(--cs-accent, #111111);
+    font-family: 'Inter', var(--heading-font), sans-serif;
+    font-weight: 500;
+    font-size: 13px;
+    line-height: 16px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-sizing: border-box;
+    overflow: hidden;
+    isolation: isolate;
+    /* Layered background: top specular radial + diagonal gloss + 4% base fill. */
+    background:
+      radial-gradient(140% 60% at 50% -10%, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0) 55%),
+      linear-gradient(105deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 35%, rgba(255,255,255,0) 65%, rgba(255,255,255,0.10) 100%),
+      rgba(255, 255, 255, 0.04);
+    /* Strong backdrop frost (always applied where backdrop-filter is supported). */
+    -webkit-backdrop-filter: blur(22px) saturate(180%) contrast(1.12);
+    backdrop-filter: blur(22px) saturate(180%) contrast(1.12);
+    box-shadow:
+      /* outer drop shadow — elevation */
+      0 2px 20px rgba(0, 0, 0, 0.10),
+      /* hairline inset ring — replaces the heavy 5.29px border so there's no
+         double-line gap against light page backgrounds */
+      inset 0 0 0 1px rgba(0, 0, 0, 0.08),
+      /* top specular highlight */
+      inset 0 1.5px 0.5px rgba(255, 255, 255, 0.7),
+      /* bottom darker edge for glass thickness */
+      inset 0 -1px 0.5px rgba(0, 0, 0, 0.08);
+    transition: background 320ms cubic-bezier(0.22, 1, 0.36, 1),
+                border-color 320ms cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 320ms cubic-bezier(0.22, 1, 0.36, 1),
+                transform 240ms cubic-bezier(0.22, 1, 0.36, 1),
+                opacity 220ms ease;
+  }
+  /* Enhanced path: browsers that support SVG-filter backdrops get real
+     chromatic refraction distortion of what's behind. Safari 18+ & modern
+     Chrome/Firefox with backdrop-filter accept the url() + blur() chain.
+     Older browsers ignore this rule and use the rule above. */
+  @supports (backdrop-filter: url(#x)) or (-webkit-backdrop-filter: url(#x)) {
+    #case-selector-{{ section.id }} .case-selector__cta {
+      -webkit-backdrop-filter: url(#case-selector-liquid-glass-{{ section.id }}) blur(18px) saturate(180%) contrast(1.12);
+      backdrop-filter: url(#case-selector-liquid-glass-{{ section.id }}) blur(18px) saturate(180%) contrast(1.12);
+    }
+  }
+  /* Subtle animated light-sweep — runs slowly while idle, faster on hover.
+     Produces the signature "light refracting through glass" motion without
+     needing Metal shaders. */
+  #case-selector-{{ section.id }} .case-selector__cta::before {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    background: linear-gradient(
+      115deg,
+      rgba(255,255,255,0) 40%,
+      rgba(255,255,255,0.28) 50%,
+      rgba(255,255,255,0) 60%
+    );
+    pointer-events: none;
+    mix-blend-mode: screen;
+    transform: translateX(-100%);
+    animation: case-selector-sweep-{{ section.id }} 6s ease-in-out infinite;
+    z-index: 1;
+  }
+  #case-selector-{{ section.id }} .case-selector__cta-label {
+    position: relative;
+    z-index: 2;
+  }
+  @keyframes case-selector-sweep-{{ section.id }} {
+    0%, 60%, 100% { transform: translateX(-120%); }
+    80%           { transform: translateX(120%); }
+  }
+  #case-selector-{{ section.id }} .case-selector__cta[disabled],
+  #case-selector-{{ section.id }} .case-selector__cta[aria-disabled="true"] {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  #case-selector-{{ section.id }} .case-selector__cta[disabled]::before,
+  #case-selector-{{ section.id }} .case-selector__cta[aria-disabled="true"]::before {
+    animation: none;
+  }
+  #case-selector-{{ section.id }} .case-selector__cta:not([disabled]):hover {
+    transform: translateY(-1px);
+    background:
+      radial-gradient(140% 65% at 50% -10%, rgba(255,255,255,0.70) 0%, rgba(255,255,255,0) 55%),
+      linear-gradient(105deg, rgba(255,255,255,0.26) 0%, rgba(255,255,255,0) 35%, rgba(255,255,255,0) 65%, rgba(255,255,255,0.16) 100%),
+      rgba(255, 255, 255, 0.10);
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.18),
+      inset 0 0 0 1px rgba(0, 0, 0, 0.12),
+      inset 0 1.5px 0.5px rgba(255, 255, 255, 0.85),
+      inset 0 -1px 0.5px rgba(0, 0, 0, 0.14);
+  }
+  #case-selector-{{ section.id }} .case-selector__cta:not([disabled]):hover::before {
+    animation-duration: 1.6s;
+  }
+  #case-selector-{{ section.id }} .case-selector__cta:not([disabled]):active {
+    transform: translateY(0);
+    box-shadow:
+      0 2px 12px rgba(0, 0, 0, 0.12),
+      inset 0 0 0 1px rgba(0, 0, 0, 0.10),
+      inset 0 1px 0.5px rgba(255, 255, 255, 0.55),
+      inset 0 -1px 0.5px rgba(0, 0, 0, 0.10);
+  }
+  /* Reduce motion — kill the sweep animation for accessibility. */
+  @media (prefers-reduced-motion: reduce) {
+    #case-selector-{{ section.id }} .case-selector__cta::before {
+      animation: none;
+    }
+  }
+  /* No-backdrop-filter fallback — slightly more opaque fill so the button is still readable. */
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    #case-selector-{{ section.id }} .case-selector__cta {
+      background-color: rgba(255, 255, 255, 0.22);
+    }
+  }
+  @media (max-width: 900px) {
+    #case-selector-{{ section.id }} {
+      margin-top: var(--cs-mt-mobile, 0);
+      margin-bottom: var(--cs-mb-mobile, 0);
+    }
+    #case-selector-{{ section.id }} .case-selector__inner {
+      grid-template-columns: 1fr;
+      padding: 40px var(--cs-side-mobile, 20px);
+      gap: 16px;
+      align-content: center;
+      grid-auto-rows: auto;
+    }
+    #case-selector-{{ section.id }} .case-selector__media {
+      aspect-ratio: auto;
+      height: {{ sec_st.card_height_mobile }}px;
+      min-height: 0;
+      max-height: none;
+    }
+    #case-selector-{{ section.id }} .case-selector__content {
+      height: auto;
+      overflow: visible;
+      align-items: flex-start;
+      text-align: left;
+      padding: 36px 28px;
+    }
+    #case-selector-{{ section.id }} .case-selector__description {
+      max-width: 100%;
+      text-align: left;
+    }
+    #case-selector-{{ section.id }} .case-selector__heading {
+      font-size: 22px;
+      line-height: 26px;
+      text-align: left;
+      white-space: nowrap;
+    }
+    /* Mobile swatches — CSS grid with two equal columns */
+    #case-selector-{{ section.id }} .case-selector__swatches {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      width: 100%;
+      max-width: 100%;
+      margin-left: 0;
+      margin-right: 0;
+    }
+    #case-selector-{{ section.id }} .case-selector__swatch {
+      width: auto;
+      height: 36px;
+      min-width: 0;
+      padding: 0 10px;
+      gap: 8px;
+    }
+    #case-selector-{{ section.id }} .case-selector__swatch-dot {
+      width: 14px;
+      height: 14px;
+    }
+    #case-selector-{{ section.id }} .case-selector__swatch::after {
+      width: 10px;
+      height: 10px;
+    }
+    #case-selector-{{ section.id }} .case-selector__swatch-label {
+      font-size: 12px;
+      line-height: 14px;
+    }
+  }
+{% endstyle %}
+
+<script>
+  (function () {
+    var sectionId = {{ section.id | json }};
+    var root = document.getElementById('case-selector-' + sectionId);
+    if (!root) return;
+
+    var swatches = root.querySelectorAll('[data-case-id]');
+    var cta = root.querySelector('[data-case-cta]');
+    var mediaImgs = root.querySelectorAll('[data-case-media]');
+    var defaultImg = root.querySelector('[data-case-media="default"]');
+    var storageKey = 'case_selector_done_' + sectionId;
+    var selected = null;
+
+    function showMedia(caseId) {
+      var anyShown = false;
+      mediaImgs.forEach(function (img) {
+        var match = img.getAttribute('data-case-media') === caseId;
+        img.classList.toggle('is-active', match);
+        if (match) anyShown = true;
+      });
+      if (!anyShown && defaultImg) defaultImg.classList.add('is-active');
+    }
+
+    // Show the default media initially (or the previously-selected case).
+    var prior = null;
+    try { prior = sessionStorage.getItem(storageKey); } catch (e) {}
+    if (prior) {
+      showMedia(prior);
+    } else {
+      if (defaultImg) defaultImg.classList.add('is-active');
+    }
+
+    function enableCta() {
+      cta.disabled = false;
+      cta.setAttribute('aria-disabled', 'false');
+    }
+
+    function selectCase(el, caseId) {
+      swatches.forEach(function (s) {
+        s.classList.remove('is-selected');
+        s.setAttribute('aria-checked', 'false');
+      });
+      el.classList.add('is-selected');
+      el.setAttribute('aria-checked', 'true');
+      selected = caseId;
+      enableCta();
+      showMedia(caseId);
+    }
+
+    swatches.forEach(function (s) {
+      s.addEventListener('click', function () {
+        selectCase(s, s.getAttribute('data-case-id'));
+      });
+    });
+
+    // Custom RAF-driven smooth scroll — gives a consistent ease-in-out
+    // animation on every browser (Safari's native smooth scroll is
+    // jumpier and skips on some iOS versions).
+    function smoothScrollTo(targetEl, duration) {
+      duration = duration || 700;
+      var targetY = targetEl.getBoundingClientRect().top + window.scrollY;
+      var startY = window.scrollY || window.pageYOffset;
+      var distance = targetY - startY;
+      var startTime = null;
+      function ease(t) {
+        return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+      }
+      function step(ts) {
+        if (startTime === null) startTime = ts;
+        var p = Math.min((ts - startTime) / duration, 1);
+        window.scrollTo(0, startY + distance * ease(p));
+        if (p < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+
+    // CTA: persist selection + smoothly anchor-scroll to next section.
+    cta.addEventListener('click', function () {
+      if (!selected || cta.disabled) return;
+      try { sessionStorage.setItem(storageKey, selected); } catch (e) {}
+      try {
+        var name = '';
+        swatches.forEach(function (s) {
+          if (s.getAttribute('data-case-id') === selected) {
+            name = s.getAttribute('data-case-name') || '';
+          }
+        });
+        localStorage.setItem('glozin_selected_case', JSON.stringify({ id: selected, name: name }));
+      } catch (e) {}
+
+      // Walk up to the Shopify section wrapper and scroll to the next one.
+      // root.nextElementSibling only sees siblings *inside* the wrapper
+      // (e.g. the SVG defs), never the next page section.
+      var wrap = root.closest('[id^="shopify-section-"]') || root.parentElement;
+      var next = wrap ? wrap.nextElementSibling : null;
+      while (next && next.nodeType !== 1) next = next.nextElementSibling;
+      if (next) smoothScrollTo(next, 700);
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Case Selector",
+  "tag": "section",
+  "disabled_on": {
+    "groups": ["header", "footer", "custom.overlay"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow (small text above heading)"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "CHOOSE YOUR CASE"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description",
+      "default": "<p>The part that stays with you. Designed to move through your day — from your desk to your bag to wherever you end up next.</p><p>Minimal in form, durable in build, and made to feel like it belongs wherever you keep it. Something you replace, it becomes part of your routine.</p>"
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "CTA button label",
+      "default": "Choose Case"
+    },
+    {
+      "type": "text",
+      "id": "support_link_label",
+      "label": "Support link label (optional)",
+      "default": "Need help choosing?"
+    },
+    {
+      "type": "url",
+      "id": "support_link_url",
+      "label": "Support link URL (optional)"
+    },
+    {
+      "type": "header",
+      "content": "Default media"
+    },
+    {
+      "type": "image_picker",
+      "id": "default_image",
+      "label": "Default image",
+      "info": "Shown before a case is selected, or when a case block has no custom image."
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "card_height",
+      "label": "Card height — Desktop",
+      "info": "Exact height of both the left image and the right content panel on desktop (>=901px). Both panels always stay equal. If your content doesn't fit, raise the value.",
+      "min": 320,
+      "max": 900,
+      "step": 10,
+      "unit": "px",
+      "default": 480
+    },
+    {
+      "type": "range",
+      "id": "card_height_mobile",
+      "label": "Card height — Mobile",
+      "info": "Sets the image height on mobile (<=900px). Content panel natural height applies below it.",
+      "min": 200,
+      "max": 700,
+      "step": 10,
+      "unit": "px",
+      "default": 360
+    },
+    {
+      "type": "range",
+      "id": "side_margin_desktop",
+      "label": "Side margin — Desktop",
+      "info": "Left/right padding from the viewport edge to the card on desktop (>=901px).",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "side_margin_mobile",
+      "label": "Side margin — Mobile",
+      "info": "Left/right padding from the viewport edge to the card on mobile (<=900px).",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "margin_top_desktop",
+      "label": "Top margin — Desktop",
+      "info": "Vertical space above the section on desktop. Negative values pull it up to overlap the previous section.",
+      "min": -200,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_desktop",
+      "label": "Bottom margin — Desktop",
+      "info": "Vertical space below the section on desktop. Negative values pull the next section up to overlap.",
+      "min": -200,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "margin_top_mobile",
+      "label": "Top margin — Mobile",
+      "info": "Vertical space above the section on mobile (<=900px). Supports negative values.",
+      "min": -200,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_mobile",
+      "label": "Bottom margin — Mobile",
+      "info": "Vertical space below the section on mobile (<=900px). Supports negative values.",
+      "min": -200,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Appearance"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#111111"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent color (CTA + selected swatch ring)",
+      "default": "#111111"
+    },
+    {
+      "type": "header",
+      "content": "Behavior"
+    },
+    {
+      "type": "checkbox",
+      "id": "lock_scroll",
+      "label": "Lock page scroll until a case is chosen",
+      "info": "While on, the customer can't scroll past this section until they select a case and click the CTA.",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "advance_duration_ms",
+      "label": "Advance animation duration",
+      "min": 200,
+      "max": 1200,
+      "step": 50,
+      "unit": "ms",
+      "default": 550
+    }
+  ],
+  "blocks": [
+    {
+      "type": "case",
+      "name": "Case option",
+      "limit": 10,
+      "settings": [
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Name",
+          "default": "Dusty Rose"
+        },
+        {
+          "type": "color",
+          "id": "color",
+          "label": "Swatch color",
+          "default": "#D4A09A"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Case image",
+          "info": "Shown on the left when this case is selected. Falls back to the default image if empty."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Case Selector",
+      "blocks": [
+        {
+          "type": "case",
+          "settings": {
+            "name": "Dusty Rose",
+            "color": "#D4A09A"
+          }
+        },
+        {
+          "type": "case",
+          "settings": {
+            "name": "Light Sky Blue",
+            "color": "#B8CDE2"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

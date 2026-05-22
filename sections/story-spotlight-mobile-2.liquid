@@ -1,0 +1,398 @@
+{%- liquid
+  assign s = section.settings
+-%}
+
+<div class="ssm2" style="background-color: {{ s.bg_color }};">
+  <div class="ssm2__inner">
+    <div class="ssm2__image-wrap">
+      {%- if s.image != blank -%}
+        {{
+          s.image
+          | image_url: width: 1200
+          | image_tag:
+            loading: 'lazy',
+            alt: s.image.alt | default: s.heading_2,
+            class: 'ssm2__img',
+            widths: '400, 600, 900, 1200',
+            sizes: '100vw'
+        }}
+      {%- else -%}
+        {{ 'image' | placeholder_svg_tag: 'ssm2__img ssm2__img--placeholder' }}
+      {%- endif -%}
+      {%- if s.heading_1 != blank -%}
+        <h3 class="ssm2__heading-1" style="color: {{ s.heading_1_color }};">
+          {%- if s.show_heading_dot -%}<span class="ssm2__dot" aria-hidden="true"></span>{%- endif -%}{{ s.heading_1 }}
+        </h3>
+      {%- endif -%}
+      {%- if s.heading_2 != blank -%}
+        <h2 class="ssm2__heading-2" style="color: {{ s.heading_2_color }};">{{ s.heading_2 | escape }}</h2>
+      {%- endif -%}
+    </div>
+    {%- if s.description != blank -%}
+      <p class="ssm2__desc" style="color: {{ s.description_color }};">{{ s.description }}</p>
+    {%- endif -%}
+  </div>
+</div>
+
+{% style %}
+  #shopify-section-{{ section.id }} {
+    background-color: {{ s.bg_color }};
+  }
+  #shopify-section-{{ section.id }} .ssm2 {
+    display: none;
+  }
+  @media screen and (max-width: 640px) {
+    #shopify-section-{{ section.id }} .ssm2 {
+      display: block;
+    }
+  }
+
+  #shopify-section-{{ section.id }} .ssm2__inner {
+    padding: 0 12px;
+  }
+  #shopify-section-{{ section.id }} .ssm2__image-wrap {
+    position: relative;
+    width: {{ s.image_size | default: 100 }}%;
+    margin: 0 auto;
+    border-radius: 14px;
+    overflow: hidden;
+    clip-path: inset(0 round 14px);
+    font-size: 0;
+    line-height: 0;
+  }
+  #shopify-section-{{ section.id }} .ssm2__img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 14px;
+    vertical-align: top;
+  }
+  #shopify-section-{{ section.id }} .ssm2__img--placeholder {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    background: #444;
+  }
+  #shopify-section-{{ section.id }} .ssm2__heading-1 {
+    position: absolute;
+    top: 24px;
+    left: 24px;
+    right: 24px;
+    z-index: 5;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    font-family: 'Inter', 'Avenir Next', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: {{ s.heading_1_weight | default: 500 }};
+    font-size: {{ s.heading_1_size | default: 14 }}px;
+    line-height: 1.2;
+    letter-spacing: 0;
+    text-transform: uppercase;
+    text-align: left;
+  }
+  #shopify-section-{{ section.id }} .ssm2__dot {
+    display: inline-block;
+    flex: none;
+    width: {{ s.heading_dot_size | default: 10 }}px;
+    height: {{ s.heading_dot_size | default: 10 }}px;
+    border-radius: 50%;
+    background: {{ s.heading_dot_color | default: '#01c78e' }};
+    margin-right: {{ s.heading_dot_gap | default: 8 }}px;
+    animation: ssm2-dot-blink 0.6s ease-in-out infinite alternate;
+  }
+  @keyframes ssm2-dot-blink {
+    from { opacity: 1; }
+    to   { opacity: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #shopify-section-{{ section.id }} .ssm2__dot { animation: none; }
+  }
+  #shopify-section-{{ section.id }} .ssm2__heading-2 {
+    position: absolute;
+    bottom: 24px;
+    left: 24px;
+    right: 24px;
+    z-index: 5;
+    margin: 0;
+    font-family: 'Inter', 'Avenir Next', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 500;
+    font-size: {{ s.heading_2_size | default: 34 }}px;
+    line-height: 1.25;
+    letter-spacing: 0;
+    text-transform: uppercase;
+    text-align: left;
+  }
+  #shopify-section-{{ section.id }} .ssm2__desc {
+    margin: 16px 0 0;
+    font-family: 'Inter', 'Avenir Next', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 400;
+    font-size: {{ s.description_size | default: 18 }}px;
+    line-height: 1.4;
+    letter-spacing: 0;
+  }
+
+  {%- comment -%} Custom margin / padding controls (4-value comma format) {%- endcomment -%}
+  {%- assign m = s.margin_desktop | split: ',' -%}
+  {%- assign p = s.padding_desktop | split: ',' -%}
+  #shopify-section-{{ section.id }} .ssm2 {
+    {%- if m[0] != blank %}margin-top: {{ m[0] }};{% endif -%}
+    {%- if m[1] != blank %}margin-right: {{ m[1] }};{% endif -%}
+    {%- if m[2] != blank %}margin-bottom: {{ m[2] }};{% endif -%}
+    {%- if m[3] != blank %}margin-left: {{ m[3] }};{% endif -%}
+    {%- if p[0] != blank %}padding-top: {{ p[0] }};{% endif -%}
+    {%- if p[1] != blank %}padding-right: {{ p[1] }};{% endif -%}
+    {%- if p[2] != blank %}padding-bottom: {{ p[2] }};{% endif -%}
+    {%- if p[3] != blank %}padding-left: {{ p[3] }};{% endif -%}
+  }
+  @media screen and (min-width: 641px) and (max-width: 960px) {
+    {%- assign m = s.margin_tablet | split: ',' -%}
+    {%- assign p = s.padding_tablet | split: ',' -%}
+    #shopify-section-{{ section.id }} .ssm2 {
+      {%- if m[0] != blank %}margin-top: {{ m[0] }};{% endif -%}
+      {%- if m[1] != blank %}margin-right: {{ m[1] }};{% endif -%}
+      {%- if m[2] != blank %}margin-bottom: {{ m[2] }};{% endif -%}
+      {%- if m[3] != blank %}margin-left: {{ m[3] }};{% endif -%}
+      {%- if p[0] != blank %}padding-top: {{ p[0] }};{% endif -%}
+      {%- if p[1] != blank %}padding-right: {{ p[1] }};{% endif -%}
+      {%- if p[2] != blank %}padding-bottom: {{ p[2] }};{% endif -%}
+      {%- if p[3] != blank %}padding-left: {{ p[3] }};{% endif -%}
+    }
+  }
+  @media screen and (max-width: 640px) {
+    {%- assign m = s.margin_mobile | split: ',' -%}
+    {%- assign p = s.padding_mobile | split: ',' -%}
+    #shopify-section-{{ section.id }} .ssm2 {
+      {%- if m[0] != blank %}margin-top: {{ m[0] }};{% endif -%}
+      {%- if m[1] != blank %}margin-right: {{ m[1] }};{% endif -%}
+      {%- if m[2] != blank %}margin-bottom: {{ m[2] }};{% endif -%}
+      {%- if m[3] != blank %}margin-left: {{ m[3] }};{% endif -%}
+      {%- if p[0] != blank %}padding-top: {{ p[0] }};{% endif -%}
+      {%- if p[1] != blank %}padding-right: {{ p[1] }};{% endif -%}
+      {%- if p[2] != blank %}padding-bottom: {{ p[2] }};{% endif -%}
+      {%- if p[3] != blank %}padding-left: {{ p[3] }};{% endif -%}
+    }
+  }
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "Story Spotlight Mobile 2",
+  "tag": "section",
+  "disabled_on": {
+    "groups": ["header", "footer", "custom.overlay"]
+  },
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "This section is only visible on mobile (≤640px). Pair with Spotlight New Desktop for the desktop version."
+    },
+    {
+      "type": "header",
+      "content": "Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "range",
+      "id": "image_size",
+      "label": "Image size",
+      "info": "Image is rendered at its natural aspect ratio. Slider scales the image's width as a % of the section.",
+      "default": 100,
+      "min": 40,
+      "max": 100,
+      "step": 2,
+      "unit": "%"
+    },
+    {
+      "type": "header",
+      "content": "Heading 1 (new — sits above the image)"
+    },
+    {
+      "type": "textarea",
+      "id": "heading_1",
+      "label": "Heading 1 text",
+      "default": "Built for the way you actually live"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_heading_dot",
+      "label": "Show blinking dot before Heading 1",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "heading_dot_color",
+      "label": "Dot color",
+      "default": "#01c78e"
+    },
+    {
+      "type": "range",
+      "id": "heading_dot_size",
+      "label": "Dot size",
+      "default": 10,
+      "min": 4,
+      "max": 24,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "heading_dot_gap",
+      "label": "Gap between dot and text",
+      "default": 8,
+      "min": 0,
+      "max": 24,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "type": "color",
+      "id": "heading_1_color",
+      "label": "Heading 1 color",
+      "default": "#111111"
+    },
+    {
+      "type": "range",
+      "id": "heading_1_size",
+      "label": "Heading 1 font size",
+      "default": 14,
+      "min": 10,
+      "max": 30,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "type": "select",
+      "id": "heading_1_weight",
+      "label": "Heading 1 font weight",
+      "default": "500",
+      "options": [
+        { "value": "400", "label": "Regular" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semi-bold" },
+        { "value": "700", "label": "Bold" }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Heading 2 (overlaid on image)"
+    },
+    {
+      "type": "textarea",
+      "id": "heading_2",
+      "label": "Heading 2 text",
+      "default": "A FUNCTIONAL PERSONAL CARE BRAND THAT PRIORITISES BODY CARE FOR PEOPLE WHO ACTUALLY MOVE THROUGH THEIR DAY."
+    },
+    {
+      "type": "color",
+      "id": "heading_2_color",
+      "label": "Heading 2 color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "heading_2_size",
+      "label": "Heading 2 font size",
+      "info": "Defaults match Story Spotlight 2 (34px).",
+      "default": 34,
+      "min": 12,
+      "max": 60,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Description"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "Your skin doesn't stop working just because your deodorant did. It sweats. It reacts. It absorbs whatever you put on it, good or bad. Summr was built around functional fragrances that interact with the skin instead of sitting on top of it. Formulas made with ingredients that belong in skincare, not just body care. A refill system that eliminates the waste without eliminating the ritual."
+    },
+    {
+      "type": "color",
+      "id": "description_color",
+      "label": "Description color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "description_size",
+      "label": "Description font size",
+      "info": "Defaults match Story Spotlight 2 (18px).",
+      "default": 18,
+      "min": 12,
+      "max": 28,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Background"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Section background",
+      "info": "Applies to both the content area and any top/bottom margin space, so margins blend into the page.",
+      "default": "#363B48"
+    },
+    {
+      "type": "header",
+      "content": "Design Desktop Options"
+    },
+    {
+      "type": "text",
+      "id": "margin_desktop",
+      "label": "Margin",
+      "info": "Margin top, margin right, margin bottom, margin left. Leave blank to skip a side. Example: ,,85px,"
+    },
+    {
+      "type": "text",
+      "id": "padding_desktop",
+      "label": "Padding",
+      "info": "Padding top, padding right, padding bottom, padding left. Leave blank to skip a side."
+    },
+    {
+      "type": "header",
+      "content": "Design Tablet Options"
+    },
+    {
+      "type": "text",
+      "id": "margin_tablet",
+      "label": "Margin",
+      "info": "Margin top, margin right, margin bottom, margin left. Leave blank to skip a side."
+    },
+    {
+      "type": "text",
+      "id": "padding_tablet",
+      "label": "Padding",
+      "info": "Padding top, padding right, padding bottom, padding left. Leave blank to skip a side."
+    },
+    {
+      "type": "header",
+      "content": "Design Mobile Options"
+    },
+    {
+      "type": "text",
+      "id": "margin_mobile",
+      "label": "Margin",
+      "info": "Margin top, margin right, margin bottom, margin left. Leave blank to skip a side. Example: ,,25px,"
+    },
+    {
+      "type": "text",
+      "id": "padding_mobile",
+      "label": "Padding",
+      "info": "Padding top, padding right, padding bottom, padding left. Leave blank to skip a side."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Story Spotlight Mobile 2"
+    }
+  ]
+}
+{% endschema %}

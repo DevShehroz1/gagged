@@ -1,0 +1,764 @@
+{{ 'banner.css' | asset_url | stylesheet_tag }}
+{%- liquid
+  assign sec_st = section.settings
+  assign section_width = sec_st.section_width
+  assign image = sec_st.image
+  assign image_mobile = sec_st.image_mobile | default: image
+  assign center_image = sec_st.center_image
+  assign center_image_mobile = sec_st.center_image_mobile | default: center_image
+  assign has_card = false
+  if center_image != blank
+    assign has_card = true
+  endif
+  if sec_st.reset_spacing
+    assign reset_spacing = ' remove_spacing'
+  endif
+-%}
+{%- capture style -%}
+  --section-pt: {{ sec_st.padding_top }}; --section-pb: {{ sec_st.padding_bottom }};
+  --height: {{ sec_st.mobile_height }}px; --height-desktop: {{ sec_st.desktop_height }}px;
+{%- endcapture -%}
+<div
+  class="section{% if sec_st.padding_top < 30 %} pt-min{% endif %}{% if sec_st.padding_bottom < 30 %} pb-min{% endif %} sec__iwto pdp-story-banner{{ reset_spacing }}"
+  style="{{ style | strip | strip_newlines }}"
+>
+  <div class="{{ section_width }}">
+    <div class="sec__inner flex relative h-custom overflow-hidden">
+      <div
+        class="banner__media w-full overlay-bg{% if section_width != 'full_width' %} rounded{% endif %} absolute inset-0"
+        style="--point: {{ image.presentation.focal_point }};"
+      >
+        {%- if image != blank -%}
+          {%- assign image_alt = image.alt | default: sec_st.heading -%}
+          {% render 'responsive-image',
+            type: 'banner',
+            container: section_width,
+            image: image,
+            image_mobile: image_mobile,
+            image_alt: image_alt
+          %}
+        {%- else -%}
+          {%- render 'placeholder-render', class: 'absolute inset-0 w-full h-full object-fit-cover' -%}
+        {%- endif -%}
+      </div>
+      <div
+        class="sec__content relative z-1 flex w-full middle-center full_width py-custom px-custom"
+        style="--padding-inline: {{ sec_st.content_padding_inline }}; --padding-block: {{ sec_st.content_padding_block }};"
+      >
+        {%- if has_card -%}
+          <div class="pdp-story-banner__card">
+            <div class="pdp-story-banner__card-media">
+              <img
+                class="pdp-story-banner__card-image pdp-story-banner__card-image--desktop"
+                src="{{ center_image | image_url: width: 1400 }}"
+                alt="{{ center_image.alt | default: sec_st.heading | escape }}"
+                loading="lazy"
+                width="{{ center_image.width }}"
+                height="{{ center_image.height }}"
+              >
+              <img
+                class="pdp-story-banner__card-image pdp-story-banner__card-image--mobile"
+                src="{{ center_image_mobile | image_url: width: 700 }}"
+                alt="{{ center_image_mobile.alt | default: sec_st.heading | escape }}"
+                loading="lazy"
+                width="{{ center_image_mobile.width }}"
+                height="{{ center_image_mobile.height }}"
+              >
+            </div>
+            {%- if sec_st.subheading != blank -%}
+              <p class="pdp-story-banner__text pdp-story-banner__subheading pdp-story-banner__text--{{ sec_st.subheading_position }}" style="color: {{ sec_st.text_color }}; --sub-y-desktop: {{ sec_st.sub_y_desktop }}px; --sub-y-mobile: {{ sec_st.sub_y_mobile }}px; --sub-max-width-mobile: {{ sec_st.subheading_max_width_mobile | default: 92 }}vw;">
+                {{ sec_st.subheading | escape }}
+              </p>
+            {%- endif -%}
+            {%- if sec_st.heading != blank -%}
+              {%- assign heading_parts = sec_st.heading | split: '|' -%}
+              <{{ sec_st.heading_tag }} class="pdp-story-banner__text pdp-story-banner__heading pdp-story-banner__text--{{ sec_st.heading_position }} mt-0 mb-0" style="color: {{ sec_st.text_color }}; --heading-max-width: {% if sec_st.heading_max_width_px_desktop > 0 %}{{ sec_st.heading_max_width_px_desktop }}px{% else %}{{ sec_st.heading_max_width }}%{% endif %}; --heading-font-size: {{ sec_st.heading_font_size_desktop | default: 48 }}px; --heading-line-height: {{ sec_st.heading_line_height_desktop | default: 54 }}px; --heading-y-mobile: {{ sec_st.heading_y_mobile | default: 0 }}px; --heading-max-width-mobile: {{ sec_st.heading_max_width_mobile | default: 92 }}vw;">
+                {%- if heading_parts.size > 1 -%}
+                  <span class="pdp-story-banner__heading-line">{{ heading_parts[0] | strip | escape }}</span><br><span class="pdp-story-banner__heading-line pdp-story-banner__heading-typewriter" data-typewriter-text="{{ heading_parts[1] | strip | escape }}">{{ heading_parts[1] | strip | escape }}</span>
+                {%- else -%}
+                  {{ sec_st.heading | escape | replace: '|', '<br>' }}
+                {%- endif -%}
+              </{{ sec_st.heading_tag }}>
+            {%- endif -%}
+          </div>
+        {%- else -%}
+          <div class="sec__content-inner w-full pdp-story-banner__stack">
+            {%- if sec_st.subheading != blank -%}
+              <p class="pdp-story-banner__subheading" style="color: {{ sec_st.text_color }};">
+                {{ sec_st.subheading | escape }}
+              </p>
+            {%- endif -%}
+            {%- if sec_st.heading != blank -%}
+              <{{ sec_st.heading_tag }} class="pdp-story-banner__heading mt-0 mb-0" style="color: {{ sec_st.text_color }};">
+                {{ sec_st.heading | escape }}
+              </{{ sec_st.heading_tag }}>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% style %}
+  /* Hide on mobile — section is shown on desktop and iPad only. */
+  @media screen and (max-width: 767px) {
+    #shopify-section-{{ section.id }} {
+      display: none !important;
+    }
+  }
+  #shopify-section-{{ section.id }} .pdp-story-banner__stack {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 20px;
+  }
+  #shopify-section-{{ section.id }} .pdp-story-banner__subheading {
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 32px;
+    line-height: 36px;
+    letter-spacing: -0.02em;
+    text-transform: capitalize;
+    margin: 0;
+    margin-top: var(--sub-y-desktop, 0);
+  }
+  #shopify-section-{{ section.id }} .pdp-story-banner__heading {
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: var(--heading-font-size, 48px);
+    line-height: var(--heading-line-height, 54px);
+    letter-spacing: -0.02em;
+    text-align: center;
+    text-transform: capitalize;
+    /* Balanced 2-line wrap on desktop per Figma. */
+    text-wrap: balance;
+  }
+  /* Card: the outer card has NO overflow clipping so the heading can visually
+     escape its bounds into the surrounding banner. The image + darken overlay
+     live inside .__card-media, which keeps overflow: hidden for the rounded
+     image corners. */
+  #shopify-section-{{ section.id }} .pdp-story-banner__card {
+    position: relative;
+    width: {{ sec_st.center_image_width }}px;
+    height: {{ sec_st.center_image_height }}px;
+    max-width: 100%;
+    margin: 0 auto;
+    border-radius: {{ sec_st.center_image_radius }}px;
+    box-shadow: 0 20px 60px -20px rgba(0, 0, 0, 0.35);
+    /* overflow stays default (visible) so the heading can extend beyond */
+  }
+  #shopify-section-{{ section.id }} .pdp-story-banner__card-media {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    overflow: hidden;
+  }
+  #shopify-section-{{ section.id }} .pdp-story-banner__card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    inset: 0;
+  }
+  #shopify-section-{{ section.id }} .pdp-story-banner__card-image--desktop {
+    display: block;
+  }
+  #shopify-section-{{ section.id }} .pdp-story-banner__card-image--mobile {
+    display: none;
+  }
+  @media screen and (max-width: 767px) {
+    #shopify-section-{{ section.id }} .pdp-story-banner__card-image--desktop {
+      display: none;
+    }
+    #shopify-section-{{ section.id }} .pdp-story-banner__card-image--mobile {
+      display: block;
+    }
+  }
+  {%- if sec_st.center_image_overlay_opacity > 0 -%}
+  #shopify-section-{{ section.id }} .pdp-story-banner__card-media::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    {%- if sec_st.center_image_overlay_color == 'light' -%}
+    background-color: rgba(255, 255, 255, {{ sec_st.center_image_overlay_opacity | divided_by: 100.0 }});
+    {%- else -%}
+    background-color: rgba(0, 0, 0, {{ sec_st.center_image_overlay_opacity | divided_by: 100.0 }});
+    {%- endif -%}
+    pointer-events: none;
+  }
+  {%- endif -%}
+  /* Overlay text — each text element is independently positioned inside the card */
+  #shopify-section-{{ section.id }} .pdp-story-banner__text {
+    position: absolute;
+    padding: 20px 24px;
+    box-sizing: border-box;
+    z-index: 2;
+    max-width: 100%;
+  }
+  /* 9-position anchors */
+  #shopify-section-{{ section.id }} .pdp-story-banner__text--top-left       { top: 0;    left: 0;  text-align: left; }
+  #shopify-section-{{ section.id }} .pdp-story-banner__text--top-center     { top: 0;    left: 0; right: 0; text-align: center; margin-inline: auto; }
+  #shopify-section-{{ section.id }} .pdp-story-banner__text--top-right      { top: 0;    right: 0; text-align: right; }
+  #shopify-section-{{ section.id }} .pdp-story-banner__text--middle-left    { top: 50%;  left: 0; transform: translateY(-50%); text-align: left; }
+  #shopify-section-{{ section.id }} .pdp-story-banner__text--middle-center  { top: 50%;  left: 0; right: 0; transform: translateY(-50%); text-align: center; margin-inline: auto; }
+  #shopify-section-{{ section.id }} .pdp-story-banner__text--middle-right   { top: 50%;  right: 0; transform: translateY(-50%); text-align: right; }
+  #shopify-section-{{ section.id }} .pdp-story-banner__text--bottom-left    { bottom: 0; left: 0; text-align: left; }
+  #shopify-section-{{ section.id }} .pdp-story-banner__text--bottom-center  { bottom: 0; left: 0; right: 0; text-align: center; margin-inline: auto; }
+  #shopify-section-{{ section.id }} .pdp-story-banner__text--bottom-right   { bottom: 0; right: 0; text-align: right; }
+  /* Heading override: use translate-based centering on center anchors so the
+     heading's max-width can exceed 100% and extend beyond the card bounds.
+     The inline style sets --heading-max-width as a CSS variable so mobile
+     can override it in the media query below without fighting inline
+     specificity. */
+  #shopify-section-{{ section.id }} .pdp-story-banner__heading {
+    max-width: var(--heading-max-width, 100%);
+  }
+  #shopify-section-{{ section.id }} .pdp-story-banner__heading.pdp-story-banner__text--top-center,
+  #shopify-section-{{ section.id }} .pdp-story-banner__heading.pdp-story-banner__text--bottom-center {
+    left: 50%;
+    right: auto;
+    margin-inline: 0;
+    transform: translateX(-50%);
+    /* Use the heading-max-width var as the actual box width on centered
+       anchors so increasing the customizer slider visibly expands the
+       heading box past the card. Falls back to max-content (natural
+       intrinsic width) when no var is set. */
+    width: var(--heading-max-width, max-content);
+  }
+  #shopify-section-{{ section.id }} .pdp-story-banner__heading.pdp-story-banner__text--middle-center {
+    left: 50%;
+    right: auto;
+    margin-inline: 0;
+    transform: translate(-50%, -50%);
+    width: var(--heading-max-width, max-content);
+  }
+  /* Typography stays at exact spec on desktop and tablet (subheading 32/36,
+     heading 48/54). Mobile gets scaled-down sizes since the spec sizes can't
+     physically fit inside a phone-width card without overlap. */
+  @media screen and (max-width: 1024px) {
+    #shopify-section-{{ section.id }} .pdp-story-banner__card {
+      width: {{ sec_st.center_image_width | times: 0.8 | round }}px;
+      height: {{ sec_st.center_image_height | times: 0.8 | round }}px;
+    }
+    #shopify-section-{{ section.id }} .pdp-story-banner__text {
+      padding: 16px 20px;
+    }
+  }
+  @media screen and (max-width: 767px) {
+    #shopify-section-{{ section.id }} .pdp-story-banner__subheading {
+      font-size: 20px;
+      line-height: 24px;
+      letter-spacing: -0.02em;
+      margin-top: var(--sub-y-mobile, 0);
+      /* Mobile-specific subheading width — defaults to 92vw if no
+         setting provided. */
+      max-width: var(--sub-max-width-mobile, 92vw);
+    }
+    #shopify-section-{{ section.id }} .pdp-story-banner__heading {
+      font-size: 32px;
+      line-height: 36px;
+      letter-spacing: -0.02em;
+      /* Mobile heading deliberately wider than the small card — set
+         max-width directly here instead of redefining the custom
+         property (the inline style wins for custom properties, so a
+         redefinition in @media loses; setting max-width in CSS works
+         because @media has same selector specificity and later source
+         order than the base rule). */
+      max-width: var(--heading-max-width-mobile, 92vw);
+      /* Independent vertical nudge from the subheading. */
+      margin-top: var(--heading-y-mobile, 0);
+      /* Encourage browser to balance the two natural lines so the
+         long heading lands at "two lines max" cleanly. */
+      text-wrap: balance;
+    }
+    /* Mobile keeps the translate-based centering so the wider heading can
+       sit centred over the card while extending past it on both sides.
+       Same treatment now applied to the subheading on mobile so the
+       subheading can also extend past the small card. */
+    #shopify-section-{{ section.id }} .pdp-story-banner__subheading.pdp-story-banner__text--top-center,
+    #shopify-section-{{ section.id }} .pdp-story-banner__subheading.pdp-story-banner__text--bottom-center {
+      left: 50%;
+      right: auto;
+      margin-inline: 0;
+      transform: translateX(-50%);
+      width: max-content;
+    }
+    #shopify-section-{{ section.id }} .pdp-story-banner__subheading.pdp-story-banner__text--middle-center {
+      left: 50%;
+      right: auto;
+      margin-inline: 0;
+      transform: translate(-50%, -50%);
+      width: max-content;
+    }
+    #shopify-section-{{ section.id }} .pdp-story-banner__card {
+      width: {{ sec_st.center_image_width_mobile | default: 140 }}px;
+      height: {{ sec_st.center_image_height_mobile | default: 160 }}px;
+      max-width: 100%;
+    }
+    #shopify-section-{{ section.id }} .pdp-story-banner__text {
+      padding: 4px 8px;
+    }
+  }
+  /* Typewriter — line 2 of the heading types out / erases on a loop.
+     Cursor is a blinking pseudo-element appended to the line. */
+  #shopify-section-{{ section.id }} .pdp-story-banner__heading-line {
+    display: inline-block;
+  }
+  #shopify-section-{{ section.id }} .pdp-story-banner__heading-typewriter {
+    /* Reserve vertical space so the line height doesn't collapse while
+       the text is empty (start of cycle / mid-erase). */
+    min-height: 1em;
+  }
+  #shopify-section-{{ section.id }} .pdp-story-banner__heading-typewriter::after {
+    content: '|';
+    display: inline-block;
+    margin-left: 4px;
+    animation: pdp-story-banner-cursor-{{ section.id }} 1s step-end infinite;
+    color: inherit;
+    font-weight: inherit;
+  }
+  @keyframes pdp-story-banner-cursor-{{ section.id }} {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #shopify-section-{{ section.id }} .pdp-story-banner__heading-typewriter::after {
+      animation: none;
+      opacity: 0;
+    }
+  }
+{% endstyle %}
+
+<script>
+  (function () {
+    var root = document.getElementById('shopify-section-{{ section.id }}');
+    if (!root) return;
+    var el = root.querySelector('.pdp-story-banner__heading-typewriter');
+    if (!el) return;
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    var fullText = el.getAttribute('data-typewriter-text') || el.textContent || '';
+    var typeMs = 80;     // delay between characters while typing
+    var eraseMs = 40;    // delay between characters while erasing
+    var holdFullMs = 2200; // pause after fully typed
+    var holdEmptyMs = 600; // pause after fully erased
+    var i = 0;
+    var deleting = false;
+
+    el.textContent = '';
+
+    function tick() {
+      if (deleting) {
+        i--;
+        el.textContent = fullText.substring(0, i);
+        if (i <= 0) {
+          deleting = false;
+          setTimeout(tick, holdEmptyMs);
+          return;
+        }
+        setTimeout(tick, eraseMs);
+      } else {
+        i++;
+        el.textContent = fullText.substring(0, i);
+        if (i >= fullText.length) {
+          deleting = true;
+          setTimeout(tick, holdFullMs);
+          return;
+        }
+        setTimeout(tick, typeMs);
+      }
+    }
+    setTimeout(tick, 400);
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "PDP Story Banner",
+  "tag": "section",
+  "disabled_on": {
+    "groups": ["header", "footer", "custom.overlay"]
+  },
+  "settings": [
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Section width",
+      "default": "stretch_width",
+      "options": [
+        { "value": "container", "label": "Container" },
+        { "value": "fluid_container", "label": "Fluid container" },
+        { "value": "stretch_width", "label": "Stretch width" },
+        { "value": "full_width", "label": "Full width" }
+      ]
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Desktop background image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_mobile",
+      "label": "Mobile background image"
+    },
+    {
+      "type": "header",
+      "content": "Height"
+    },
+    {
+      "type": "range",
+      "id": "desktop_height",
+      "min": 300,
+      "max": 1000,
+      "step": 10,
+      "unit": "px",
+      "default": 680,
+      "label": "Desktop height"
+    },
+    {
+      "type": "range",
+      "id": "mobile_height",
+      "min": 200,
+      "max": 800,
+      "step": 10,
+      "unit": "px",
+      "default": 400,
+      "label": "Mobile height"
+    },
+    {
+      "type": "header",
+      "content": "Center card (image with overlaid text)"
+    },
+    {
+      "type": "image_picker",
+      "id": "center_image",
+      "label": "Center image (desktop)",
+      "info": "When set, the subheading + heading render overlaid on top of this image. Leave blank to show text directly on the banner background."
+    },
+    {
+      "type": "image_picker",
+      "id": "center_image_mobile",
+      "label": "Center image (mobile)",
+      "info": "Optional separate image for mobile so the aspect ratio matches the smaller portrait card. Falls back to the desktop image if blank."
+    },
+    {
+      "type": "range",
+      "id": "center_image_width",
+      "label": "Center image width (desktop)",
+      "min": 200,
+      "max": 1200,
+      "step": 10,
+      "unit": "px",
+      "default": 480
+    },
+    {
+      "type": "range",
+      "id": "center_image_height",
+      "label": "Center image height (desktop)",
+      "min": 150,
+      "max": 900,
+      "step": 10,
+      "unit": "px",
+      "default": 320
+    },
+    {
+      "type": "range",
+      "id": "center_image_width_mobile",
+      "label": "Center image width (mobile)",
+      "min": 100,
+      "max": 700,
+      "step": 10,
+      "unit": "px",
+      "default": 140
+    },
+    {
+      "type": "range",
+      "id": "center_image_height_mobile",
+      "label": "Center image height (mobile)",
+      "min": 100,
+      "max": 700,
+      "step": 10,
+      "unit": "px",
+      "default": 160
+    },
+    {
+      "type": "range",
+      "id": "center_image_radius",
+      "label": "Corner radius",
+      "min": 0,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "center_image_overlay_opacity",
+      "label": "Image overlay opacity",
+      "min": 0,
+      "max": 80,
+      "step": 5,
+      "unit": "%",
+      "default": 20
+    },
+    {
+      "type": "select",
+      "id": "center_image_overlay_color",
+      "label": "Overlay tint",
+      "default": "dark",
+      "options": [
+        { "value": "dark", "label": "Dark (black)" },
+        { "value": "light", "label": "Light (white)" }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Subheading"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Your Summr starts here."
+    },
+    {
+      "type": "select",
+      "id": "subheading_position",
+      "label": "Subheading position",
+      "default": "top-center",
+      "info": "Position inside the center image.",
+      "options": [
+        { "value": "top-left", "label": "Top left" },
+        { "value": "top-center", "label": "Top center" },
+        { "value": "top-right", "label": "Top right" },
+        { "value": "middle-left", "label": "Middle left" },
+        { "value": "middle-center", "label": "Middle center" },
+        { "value": "middle-right", "label": "Middle right" },
+        { "value": "bottom-left", "label": "Bottom left" },
+        { "value": "bottom-center", "label": "Bottom center" },
+        { "value": "bottom-right", "label": "Bottom right" }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Subheading vertical position"
+    },
+    {
+      "type": "paragraph",
+      "content": "Separate up/down nudges for each breakpoint. Negative = up, positive = down, 0 = sit at the anchor."
+    },
+    {
+      "type": "range",
+      "id": "sub_y_desktop",
+      "label": "Desktop — Subheading up / down",
+      "min": -200,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "sub_y_mobile",
+      "label": "Mobile — Subheading up / down",
+      "info": "Applied below 767px.",
+      "min": -200,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "subheading_max_width_mobile",
+      "label": "Mobile — Subheading width",
+      "info": "Max width of the subheading on mobile, as a % of the viewport width. Above the card's width so the subheading can extend past the small card image.",
+      "min": 50,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 80
+    },
+    {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "info": "Use the | character to force a line break (e.g. \"A Post Sweat Routine|Built Specifically For You\" → 2 lines exact).",
+      "default": "A Post Sweat Routine|Built Specifically For You"
+    },
+    {
+      "type": "select",
+      "id": "heading_tag",
+      "label": "Heading tag",
+      "default": "h2",
+      "options": [
+        { "value": "h1", "label": "H1" },
+        { "value": "h2", "label": "H2" },
+        { "value": "h3", "label": "H3" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "heading_position",
+      "label": "Heading position",
+      "default": "middle-center",
+      "info": "Position inside the center image.",
+      "options": [
+        { "value": "top-left", "label": "Top left" },
+        { "value": "top-center", "label": "Top center" },
+        { "value": "top-right", "label": "Top right" },
+        { "value": "middle-left", "label": "Middle left" },
+        { "value": "middle-center", "label": "Middle center" },
+        { "value": "middle-right", "label": "Middle right" },
+        { "value": "bottom-left", "label": "Bottom left" },
+        { "value": "bottom-center", "label": "Bottom center" },
+        { "value": "bottom-right", "label": "Bottom right" }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "heading_max_width_px_desktop",
+      "label": "Desktop — Heading width (px)",
+      "info": "Direct pixel width of the heading box. 0 = use the % control below instead.",
+      "min": 0,
+      "max": 1500,
+      "step": 15,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "heading_font_size_desktop",
+      "label": "Desktop — Heading font size",
+      "info": "Bigger font lets the heading text visually extend past the card. Default 48 matches Figma; raise to 64–72 for a bolder look.",
+      "min": 24,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "heading_line_height_desktop",
+      "label": "Desktop — Heading line height",
+      "info": "Pair with the font size above. Roughly 1.1–1.2× the font size reads well.",
+      "min": 28,
+      "max": 140,
+      "step": 2,
+      "unit": "px",
+      "default": 54
+    },
+    {
+      "type": "range",
+      "id": "heading_max_width",
+      "label": "Heading width (% of card)",
+      "info": "Used when the px control above is 0. 100% = fills the card. Values above 100% let the heading extend beyond the card bounds (e.g. 300% = 3× the card width).",
+      "min": 30,
+      "max": 500,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "heading_max_width_mobile",
+      "label": "Mobile — Heading width",
+      "info": "Max width of the heading on mobile, as a % of the viewport width. Allows the heading to be wider than the small mobile card.",
+      "min": 50,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "heading_y_mobile",
+      "label": "Mobile — Heading up / down",
+      "info": "Negative = up, positive = down. Applied below 767px.",
+      "min": -200,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Text color"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "Content spacing"
+    },
+    {
+      "type": "range",
+      "id": "content_padding_inline",
+      "min": 0,
+      "max": 150,
+      "step": 5,
+      "unit": "px",
+      "default": 60,
+      "label": "Left / right padding"
+    },
+    {
+      "type": "range",
+      "id": "content_padding_block",
+      "min": 15,
+      "max": 150,
+      "step": 5,
+      "unit": "px",
+      "default": 60,
+      "label": "Top / bottom padding"
+    },
+    {
+      "type": "header",
+      "content": "Section padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "default": 0,
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "default": 0,
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "type": "checkbox",
+      "id": "reset_spacing",
+      "label": "Remove section spacing",
+      "default": false
+    }
+  ],
+  "presets": [
+    {
+      "name": "PDP Story Banner"
+    }
+  ]
+}
+{% endschema %}

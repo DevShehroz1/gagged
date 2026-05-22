@@ -1,0 +1,673 @@
+{%- liquid
+  assign sec_st = section.settings
+  if sec_st.reset_spacing
+    assign reset_spacing = ' remove_spacing'
+  endif
+  assign pt_mobile = sec_st.padding_top_mobile
+  if pt_mobile == 0
+    assign pt_mobile = sec_st.padding_top
+  endif
+  assign pb_mobile = sec_st.padding_bottom_mobile
+  if pb_mobile == 0
+    assign pb_mobile = sec_st.padding_bottom
+  endif
+
+  assign side_class = ''
+  if sec_st.image_side == 'left'
+    assign side_class = ' story-feature-2--image-left'
+  endif
+
+  assign treatment = sec_st.outer_treatment | default: 'grayscale'
+  assign darken = sec_st.darken_amount | default: 40
+  assign overlay_alpha = darken | times: 0.01
+
+  assign heading_color = sec_st.heading_color | default: sec_st.text_color
+  assign divider_color = sec_st.divider_color | default: sec_st.text_color
+  assign description_color = sec_st.description_color | default: sec_st.text_color
+-%}
+<div
+  class="story-feature-2{{ reset_spacing }}{{ side_class }}"
+  style="background-color: {{ sec_st.bg_color }};"
+>
+  <div class="story-feature-2__inner">
+    <div class="story-feature-2__media">
+      <div class="story-feature-2__media-stack">
+        <div class="story-feature-2__outer-wrap">
+          {%- if sec_st.image != blank -%}
+            {%- assign image_alt = sec_st.image.alt | default: 'Story' -%}
+            {{
+              sec_st.image
+              | image_url: width: 1600
+              | image_tag:
+                loading: 'lazy',
+                alt: image_alt,
+                class: 'story-feature-2__img-outer',
+                widths: '720, 1080, 1440, 1600',
+                sizes: '(max-width: 767px) 100vw, 50vw'
+            }}
+          {%- else -%}
+            <span class="story-feature-2__img-outer story-feature-2__img-outer--placeholder" aria-hidden="true"></span>
+          {%- endif -%}
+          {%- if treatment == 'black_overlay' or treatment == 'both' -%}
+            <span class="story-feature-2__overlay" aria-hidden="true"></span>
+          {%- endif -%}
+          {%- if sec_st.image_inner != blank -%}
+            {%- assign inner_alt = sec_st.image_inner.alt | default: 'Detail' -%}
+            {{
+              sec_st.image_inner
+              | image_url: width: 900
+              | image_tag:
+                loading: 'lazy',
+                alt: inner_alt,
+                class: 'story-feature-2__img-inner',
+                widths: '480, 720, 900',
+                sizes: '(max-width: 767px) 60vw, 30vw'
+            }}
+          {%- endif -%}
+        </div>
+      </div>
+    </div>
+    <div class="story-feature-2__text">
+      {%- if sec_st.description_1 != blank -%}
+        <p class="story-feature-2__desc story-feature-2__desc--1">{{ sec_st.description_1 | newline_to_br }}</p>
+      {%- endif -%}
+      <hr class="story-feature-2__divider">
+      {%- if sec_st.description_2 != blank -%}
+        <p class="story-feature-2__desc story-feature-2__desc--2">{{ sec_st.description_2 | newline_to_br }}</p>
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+
+{% style %}
+  #shopify-section-{{ section.id }} br {
+    display: inline;
+  }
+  #shopify-section-{{ section.id }} .story-feature-2 {
+    overflow: hidden;
+    padding-top: {{ sec_st.padding_top | default: 0 }}px;
+    padding-bottom: {{ sec_st.padding_bottom | default: 0 }}px;
+  }
+  #shopify-section-{{ section.id }} .story-feature-2__inner {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    {%- if sec_st.section_max_width_desktop and sec_st.section_max_width_desktop > 0 %}
+    max-width: {{ sec_st.section_max_width_desktop }}px;
+    margin: 0 auto;
+    {%- endif %}
+    padding-left: {{ sec_st.section_side_padding_desktop | default: 0 }}px;
+    padding-right: {{ sec_st.section_side_padding_desktop | default: 0 }}px;
+    box-sizing: border-box;
+  }
+  #shopify-section-{{ section.id }} .story-feature-2--image-left .story-feature-2__inner {
+    flex-direction: row-reverse;
+  }
+  #shopify-section-{{ section.id }} .story-feature-2__media {
+    flex: 0 0 50%;
+    width: 50%;
+    padding: 50px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #shopify-section-{{ section.id }} .story-feature-2__media-stack {
+    position: relative;
+    width: 100%;
+  }
+  #shopify-section-{{ section.id }} .story-feature-2__outer-wrap {
+    position: relative;
+    width: {{ sec_st.outer_image_width_desktop | default: 100 }}%;
+    margin: 0 auto;
+    border-radius: {{ sec_st.outer_image_radius | default: 0 }}px;
+    overflow: hidden;
+    background-color: #000;
+  }
+  #shopify-section-{{ section.id }} .story-feature-2__img-outer {
+    display: block;
+    width: 100%;
+    height: auto;
+    {%- if treatment == 'grayscale' or treatment == 'both' %}
+    filter: grayscale(100%);
+    {%- endif %}
+  }
+  #shopify-section-{{ section.id }} .story-feature-2__img-outer--placeholder {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    background: #2a2a2a;
+  }
+  #shopify-section-{{ section.id }} .story-feature-2__overlay {
+    position: absolute;
+    inset: 0;
+    background: #000;
+    opacity: {{ overlay_alpha }};
+    pointer-events: none;
+  }
+  #shopify-section-{{ section.id }} .story-feature-2__img-inner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: {{ sec_st.inner_image_width_desktop | default: 60 }}%;
+    height: auto;
+    display: block;
+    border-radius: {{ sec_st.inner_image_radius | default: 12 }}px;
+    box-shadow: 0 16px 50px rgba(0, 0, 0, 0.45);
+    z-index: 2;
+  }
+  #shopify-section-{{ section.id }} .story-feature-2__text {
+    flex: 0 0 50%;
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 30px;
+    padding-left: 20px;
+    padding-right: 50px;
+    box-sizing: border-box;
+  }
+  #shopify-section-{{ section.id }} .story-feature-2--image-left .story-feature-2__text {
+    padding-left: 50px;
+    padding-right: 20px;
+  }
+  #shopify-section-{{ section.id }} .story-feature-2__desc {
+    margin: 0;
+    letter-spacing: 0;
+  }
+  #shopify-section-{{ section.id }} p.story-feature-2__desc--1 {
+    font-family: 'Inter', sans-serif !important;
+    font-weight: {{ sec_st.desc_1_weight | default: 400 }} !important;
+    font-size: {{ sec_st.desc_1_size_desktop | default: 24 }}px !important;
+    line-height: {{ sec_st.desc_1_line_height_desktop | default: 26 }}px !important;
+    color: {{ heading_color }} !important;
+    {%- if sec_st.desc_1_max_width_desktop and sec_st.desc_1_max_width_desktop > 0 %}
+    max-width: {{ sec_st.desc_1_max_width_desktop }}px;
+    {%- endif %}
+  }
+  #shopify-section-{{ section.id }} .story-feature-2__divider {
+    width: 80px;
+    height: 0;
+    border: none;
+    border-top: 2px solid {{ divider_color }};
+    margin: 0;
+    opacity: 1;
+  }
+  #shopify-section-{{ section.id }} p.story-feature-2__desc--2 {
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 400 !important;
+    font-size: {{ sec_st.desc_2_size_desktop | default: 18 }}px !important;
+    line-height: {{ sec_st.desc_2_line_height_desktop | default: 24 }}px !important;
+    color: {{ description_color }} !important;
+    {%- if sec_st.desc_2_max_width_desktop and sec_st.desc_2_max_width_desktop > 0 %}
+    max-width: {{ sec_st.desc_2_max_width_desktop }}px;
+    {%- endif %}
+  }
+  @media screen and (max-width: 1199px) {
+    #shopify-section-{{ section.id }} .story-feature-2__media {
+      padding: 30px;
+    }
+    #shopify-section-{{ section.id }} .story-feature-2__text {
+      padding-left: 20px;
+      padding-right: 30px;
+    }
+    #shopify-section-{{ section.id }} .story-feature-2--image-left .story-feature-2__text {
+      padding-left: 30px;
+      padding-right: 20px;
+    }
+  }
+  @media screen and (max-width: 767px) {
+    #shopify-section-{{ section.id }} .story-feature-2 {
+      padding-top: {{ pt_mobile | default: 0 }}px;
+      padding-bottom: {{ pb_mobile | default: 0 }}px;
+    }
+    #shopify-section-{{ section.id }} .story-feature-2__inner,
+    #shopify-section-{{ section.id }} .story-feature-2--image-left .story-feature-2__inner {
+      flex-direction: column;
+      align-items: stretch;
+      padding-left: {{ sec_st.section_side_padding_mobile | default: 0 }}px;
+      padding-right: {{ sec_st.section_side_padding_mobile | default: 0 }}px;
+    }
+    #shopify-section-{{ section.id }} .story-feature-2__media {
+      flex: none;
+      width: 100%;
+      padding: 20px 20px 0;
+    }
+    #shopify-section-{{ section.id }} .story-feature-2__outer-wrap {
+      width: {{ sec_st.outer_image_width_mobile | default: 100 }}%;
+    }
+    #shopify-section-{{ section.id }} .story-feature-2__img-inner {
+      width: {{ sec_st.inner_image_width_mobile | default: 70 }}%;
+    }
+    #shopify-section-{{ section.id }} .story-feature-2__text,
+    #shopify-section-{{ section.id }} .story-feature-2--image-left .story-feature-2__text {
+      flex: none;
+      width: 100%;
+      padding: 50px 20px;
+      gap: 20px;
+    }
+    #shopify-section-{{ section.id }} p.story-feature-2__desc--1 {
+      font-size: {{ sec_st.desc_1_size_mobile | default: 20 }}px !important;
+      line-height: {{ sec_st.desc_1_line_height_mobile | default: 24 }}px !important;
+      {%- if sec_st.desc_1_max_width_mobile and sec_st.desc_1_max_width_mobile > 0 %}
+      max-width: {{ sec_st.desc_1_max_width_mobile }}px;
+      {%- endif %}
+    }
+    #shopify-section-{{ section.id }} p.story-feature-2__desc--2 {
+      font-size: {{ sec_st.desc_2_size_mobile | default: 18 }}px !important;
+      line-height: {{ sec_st.desc_2_line_height_mobile | default: 24 }}px !important;
+      {%- if sec_st.desc_2_max_width_mobile and sec_st.desc_2_max_width_mobile > 0 %}
+      max-width: {{ sec_st.desc_2_max_width_mobile }}px;
+      {%- endif %}
+    }
+  }
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "Story Feature 2",
+  "tag": "section",
+  "disabled_on": {
+    "groups": ["header", "footer", "custom.overlay"]
+  },
+  "settings": [
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background color",
+      "default": "#363B48"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Default text color (fallback)",
+      "default": "#FFF8B8"
+    },
+    {
+      "type": "header",
+      "content": "Text"
+    },
+    {
+      "type": "textarea",
+      "id": "description_1",
+      "label": "Heading text",
+      "default": "Masking kind of a way, scents that feel like skin but better. Something becomes a version of you."
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color"
+    },
+    {
+      "type": "select",
+      "id": "desc_1_weight",
+      "label": "Heading weight",
+      "default": "400",
+      "options": [
+        { "value": "300", "label": "Light" },
+        { "value": "400", "label": "Regular" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semi-bold" },
+        { "value": "700", "label": "Bold" },
+        { "value": "800", "label": "Extra-bold" }
+      ]
+    },
+    {
+      "type": "color",
+      "id": "divider_color",
+      "label": "Divider color"
+    },
+    {
+      "type": "textarea",
+      "id": "description_2",
+      "label": "Description text",
+      "default": "We wanted fragrance that sits differently on everyone who wears it. That blends into your chemistry, picks up your warmth, moves with your day. The kind where someone asks you what you're wearing and the honest answer is it doesn't smell like this on anyone else."
+    },
+    {
+      "type": "color",
+      "id": "description_color",
+      "label": "Description color"
+    },
+    {
+      "type": "header",
+      "content": "Text width"
+    },
+    {
+      "type": "paragraph",
+      "content": "0 = no override (current line widths). Increase to constrain the paragraph width."
+    },
+    {
+      "type": "range",
+      "id": "desc_1_size_desktop",
+      "label": "Heading size — Desktop",
+      "default": 24,
+      "min": 10,
+      "max": 60,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "desc_1_line_height_desktop",
+      "label": "Heading line height — Desktop",
+      "default": 26,
+      "min": 14,
+      "max": 80,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "desc_1_size_mobile",
+      "label": "Heading size — Mobile",
+      "default": 20,
+      "min": 10,
+      "max": 40,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "desc_1_line_height_mobile",
+      "label": "Heading line height — Mobile",
+      "default": 24,
+      "min": 14,
+      "max": 48,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "desc_2_size_desktop",
+      "label": "Description size — Desktop",
+      "default": 18,
+      "min": 10,
+      "max": 40,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "desc_2_line_height_desktop",
+      "label": "Description line height — Desktop",
+      "default": 24,
+      "min": 14,
+      "max": 60,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "desc_2_size_mobile",
+      "label": "Description size — Mobile",
+      "default": 18,
+      "min": 10,
+      "max": 32,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "desc_2_line_height_mobile",
+      "label": "Description line height — Mobile",
+      "default": 24,
+      "min": 14,
+      "max": 40,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "desc_1_max_width_desktop",
+      "label": "Heading max width — Desktop",
+      "default": 0,
+      "min": 0,
+      "max": 1000,
+      "step": 10,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "desc_1_max_width_mobile",
+      "label": "Heading max width — Mobile",
+      "default": 0,
+      "min": 0,
+      "max": 800,
+      "step": 10,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "desc_2_max_width_desktop",
+      "label": "Description max width — Desktop",
+      "default": 0,
+      "min": 0,
+      "max": 1000,
+      "step": 10,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "desc_2_max_width_mobile",
+      "label": "Description max width — Mobile",
+      "default": 0,
+      "min": 0,
+      "max": 800,
+      "step": 10,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "image_side",
+      "label": "Image side (desktop)",
+      "options": [
+        { "value": "right", "label": "Right" },
+        { "value": "left", "label": "Left" }
+      ],
+      "default": "right"
+    },
+    {
+      "type": "range",
+      "id": "section_max_width_desktop",
+      "label": "Section max width — Desktop",
+      "info": "0 = full width (current behavior). Set > 0 to constrain and center the row.",
+      "default": 0,
+      "min": 0,
+      "max": 2000,
+      "step": 20,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "section_side_padding_desktop",
+      "label": "Section side padding — Desktop",
+      "default": 0,
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "section_side_padding_mobile",
+      "label": "Section side padding — Mobile",
+      "default": 0,
+      "min": 0,
+      "max": 80,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Outer image"
+    },
+    {
+      "type": "paragraph",
+      "content": "Outer image is rendered at its natural aspect ratio. Use the width sliders to scale it up or down."
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Outer image"
+    },
+    {
+      "type": "range",
+      "id": "outer_image_width_desktop",
+      "label": "Outer image width (desktop)",
+      "info": "% of the media column. 100% fills the column, lower values shrink the image while keeping its natural aspect.",
+      "min": 50,
+      "max": 100,
+      "step": 2,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "outer_image_width_mobile",
+      "label": "Outer image width (mobile)",
+      "min": 50,
+      "max": 100,
+      "step": 2,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "select",
+      "id": "outer_treatment",
+      "label": "Outer image treatment",
+      "options": [
+        { "value": "grayscale", "label": "Grayscale" },
+        { "value": "black_overlay", "label": "Black overlay" },
+        { "value": "both", "label": "Grayscale + black overlay" },
+        { "value": "none", "label": "None" }
+      ],
+      "default": "grayscale"
+    },
+    {
+      "type": "range",
+      "id": "darken_amount",
+      "label": "Black overlay strength",
+      "info": "Only used when treatment includes a black overlay.",
+      "min": 0,
+      "max": 90,
+      "step": 5,
+      "unit": "%",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "outer_image_radius",
+      "label": "Outer image radius",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Inner image"
+    },
+    {
+      "type": "paragraph",
+      "content": "Inner image is rendered at its natural aspect ratio over the outer image. Use the width sliders to scale it."
+    },
+    {
+      "type": "image_picker",
+      "id": "image_inner",
+      "label": "Inner image (smaller, centered)"
+    },
+    {
+      "type": "range",
+      "id": "inner_image_width_desktop",
+      "label": "Inner image width (desktop)",
+      "min": 20,
+      "max": 90,
+      "step": 2,
+      "unit": "%",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "inner_image_width_mobile",
+      "label": "Inner image width (mobile)",
+      "min": 30,
+      "max": 100,
+      "step": 2,
+      "unit": "%",
+      "default": 70
+    },
+    {
+      "type": "range",
+      "id": "inner_image_radius",
+      "label": "Inner image radius",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "Section padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top (desktop)",
+      "default": 0,
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom (desktop)",
+      "default": 0,
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "label": "Padding top (mobile)",
+      "info": "Falls back to the desktop value when 0.",
+      "default": 0,
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom (mobile)",
+      "info": "Falls back to the desktop value when 0.",
+      "default": 0,
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "unit": "px"
+    },
+    {
+      "type": "checkbox",
+      "id": "reset_spacing",
+      "label": "Remove section spacing",
+      "default": false
+    }
+  ],
+  "presets": [
+    {
+      "name": "Story Feature 2"
+    }
+  ]
+}
+{% endschema %}

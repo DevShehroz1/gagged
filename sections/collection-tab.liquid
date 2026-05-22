@@ -204,6 +204,13 @@
                         data-free-scroll="{{ data_free_scroll }}"
                       >
                         {% for product in collection.products %}
+                          {%- liquid
+                            assign pi_coming_raw = product.metafields.custom.coming.value
+                            assign pi_class = 'grid-custom-item'
+                            if pi_coming_raw == true or pi_coming_raw == 'true'
+                              assign pi_class = 'grid-custom-item ct-coming-soon'
+                            endif
+                          -%}
                           {% render 'product-item',
                             card_product: product,
                             container: section_width,
@@ -212,7 +219,7 @@
                             padding: column_gap,
                             scroll_animation: scroll_animation,
                             section_id: section.id,
-                            class: 'grid-custom-item',
+                            class: pi_class,
                             template_enable_action: true,
                             template_enable_product_vendor: true,
                             template_enable_rate: true,
@@ -221,7 +228,8 @@
                             template_enable_price: true,
                             template_enable_add_cart: true,
                             indexFor: forloop.index,
-                            template_enable_product_badges: true
+                            template_enable_product_badges: true,
+                            show_product_badge: true
                           %}
                         {% endfor %}
                       </grid-custom>
@@ -282,6 +290,13 @@
                       data-free-scroll="{{ data_free_scroll }}"
                     >
                       {% for product in collection.products limit: limit_products_paginate %}
+                        {%- liquid
+                          assign pi_coming_raw = product.metafields.custom.coming.value
+                          assign pi_class = ' grid-custom-item'
+                          if pi_coming_raw == true or pi_coming_raw == 'true'
+                            assign pi_class = ' grid-custom-item ct-coming-soon'
+                          endif
+                        -%}
                         {% render 'product-item',
                           card_product: product,
                           section_id: section.id,
@@ -289,7 +304,7 @@
                           colunm: items_per_row,
                           colunm_mobile: section_st.items_per_row_mobile,
                           padding: column_gap,
-                          class: ' grid-custom-item',
+                          class: pi_class,
                           template_enable_action: true,
                           template_enable_product_vendor: true,
                           template_enable_rate: true,
@@ -299,7 +314,8 @@
                           template_enable_add_cart: true,
                           template_enable_product_badges: true,
                           scroll_animation: scroll_animation,
-                          indexFor: forloop.index
+                          indexFor: forloop.index,
+                          show_product_badge: true
                         %}
                       {% endfor %}
                     </grid-custom>
@@ -400,10 +416,17 @@
                       {% endif %}
                       <div class="swiper-wrapper">
                         {% for product in block_st.collection.products %}
+                          {%- liquid
+                            assign pi_coming_raw = product.metafields.custom.coming.value
+                            assign pi_class = ' swiper-slide'
+                            if pi_coming_raw == true or pi_coming_raw == 'true'
+                              assign pi_class = ' swiper-slide ct-coming-soon'
+                            endif
+                          -%}
                           {% render 'product-item',
                             card_product: product,
                             section_id: section.id,
-                            class: ' swiper-slide',
+                            class: pi_class,
                             template_enable_action: true,
                             template_enable_product_vendor: true,
                             template_enable_rate: true,
@@ -413,7 +436,8 @@
                             template_enable_add_cart: true,
                             template_enable_product_badges: true,
                             scroll_animation: scroll_animation,
-                            indexFor: forloop.index
+                            indexFor: forloop.index,
+                            show_product_badge: true
                           %}
                         {% endfor %}
                       </div>
@@ -502,6 +526,267 @@
         </div>
       </tab-items>
     {% endif %}
+    {% if button_label != blank %}
+      <div class="collection-tab__cta text-center mt-40 mb-20">
+        <a href="/collections/all" class="collection-tab__cta-btn-glass inline-flex no-underline">
+          {{ button_label }}
+        </a>
+      </div>
+    {% endif %}
+<style>
+  /* Collection tab heading */
+  .sec__collection-tab .section__header .section__header-heading,
+  .sec__collection-tab h2.section__header-heading {
+    font-family: 'Inter', var(--heading-font), sans-serif !important;
+    font-weight: 500 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.01em !important;
+    display: inline-block !important;
+    padding-bottom: 10px !important;
+    border-bottom: 2px solid #A6BDDD !important;
+    border-bottom-color: #A6BDDD !important;
+    margin-bottom: 30px !important;
+  }
+
+  /* Hide the tab strip underline/border from theme defaults on this section */
+  .sec__collection-tab .collection-tab__ta { border-bottom: none !important; }
+
+  /* Tab items stay as simple text links (hidden if only one collection) */
+  .sec__collection-tab .collection-tab__tab-item {
+    font-family: 'Inter', var(--heading-font), sans-serif !important;
+    font-weight: 500 !important;
+    font-size: 12.8px !important;
+    line-height: 19.58px !important;
+    letter-spacing: 0.96px !important;
+    text-transform: uppercase !important;
+    padding: 10px 20px !important;
+  }
+
+  /* Mobile: hide the extra underline/progress bar under the tab heading.
+     Desktop keeps the #A6BDDD indicator untouched. */
+  @media (max-width: 767.98px) {
+    .sec__collection-tab .collection-tab__tab-item,
+    .sec__collection-tab .collection-tab__tab-item.border-animation {
+      background-image: none !important;
+      border-bottom: 0 !important;
+    }
+  }
+
+  /* Product titles inside the collection tab */
+  .sec__collection-tab .product-card-information__title,
+  .sec__collection-tab .product-card-title,
+  .sec__collection-tab .card__heading a,
+  .sec__collection-tab .product-item .card__heading,
+  .sec__collection-tab .product-card .card__heading,
+  .sec__collection-tab .product-item .h5,
+  .sec__collection-tab .product-item .h6 {
+    font-family: 'Inter', var(--heading-font), sans-serif !important;
+    font-weight: 400 !important;
+    font-size: 18px !important;
+    line-height: 20px !important;
+    letter-spacing: 0 !important;
+    text-align: center !important;
+    text-transform: uppercase !important;
+  }
+
+  /* Hide price and description inside collection tab product cards to match reference */
+  .sec__collection-tab .price,
+  .sec__collection-tab .product-item__price,
+  .sec__collection-tab .card-information__price,
+  .sec__collection-tab .product-item__description,
+  .sec__collection-tab .product-card__description {
+    display: none !important;
+  }
+
+  /* Center product info under card */
+  .sec__collection-tab .product-item .card-information,
+  .sec__collection-tab .product-item__info {
+    text-align: center !important;
+  }
+
+  /* CTA button — neutral iOS 26 liquid glass (no lavender tint) */
+  .collection-tab__cta {
+    display: flex !important;
+    justify-content: center !important;
+    margin-top: 30px !important;
+  }
+  .collection-tab__cta-btn-glass {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 260px;
+    height: 48px;
+    padding: 0 36px;
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(24px) saturate(180%) brightness(1.02);
+    -webkit-backdrop-filter: blur(24px) saturate(180%) brightness(1.02);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    color: #111;
+    border-radius: 999px;
+    font-family: 'Inter', var(--heading-font), sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 16px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-align: center;
+    text-decoration: none;
+    box-shadow:
+      inset 0 1px 1px rgba(255, 255, 255, 0.95),
+      inset 0 -1px 1px rgba(0, 0, 0, 0.04),
+      0 1px 2px rgba(0, 0, 0, 0.04),
+      0 8px 24px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    overflow: hidden;
+  }
+  .collection-tab__cta-btn-glass::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 40%, rgba(255, 255, 255, 0) 60%, rgba(255, 255, 255, 0.25) 100%);
+    pointer-events: none;
+  }
+  .collection-tab__cta-btn-glass::after {
+    content: "";
+    position: absolute;
+    top: 1px;
+    left: 8%;
+    right: 8%;
+    height: 40%;
+    border-radius: 999px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0) 100%);
+    pointer-events: none;
+  }
+  .collection-tab__cta-btn-glass > * { position: relative; z-index: 1; }
+  .collection-tab__cta-btn-glass:hover {
+    background: rgba(255, 255, 255, 0.7);
+    border-color: rgba(0, 0, 0, 0.12);
+    box-shadow:
+      inset 0 1px 1px rgba(255, 255, 255, 1),
+      inset 0 -1px 1px rgba(0, 0, 0, 0.06),
+      0 2px 4px rgba(0, 0, 0, 0.05),
+      0 12px 32px rgba(0, 0, 0, 0.12);
+  }
+
+  /* Product card image — Figma spec 320x410, border-radius 20px */
+  .sec__collection-tab .product__media,
+  .sec__collection-tab .product-item__media--ratio {
+    aspect-ratio: 320 / 410 !important;
+    max-width: 320px;
+    width: 100%;
+    height: auto;
+    border-radius: 20px !important;
+    overflow: hidden;
+    margin-inline: auto;
+    opacity: 1;
+    position: relative;
+  }
+  .sec__collection-tab .product__media img,
+  .sec__collection-tab .product-item__media--ratio img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: filter 0.3s ease, transform 0.3s ease;
+  }
+
+  /* Coming-soon state — toggled per product by the `ct-coming-soon`
+     class that's conditionally appended on the product-item render
+     (triggered by product.metafields.custom.coming.value). Scoped to
+     this section so it can't leak to other collections. */
+  .sec__collection-tab .ct-coming-soon .product__media img,
+  .sec__collection-tab .ct-coming-soon .product-item__media--ratio img {
+    filter: blur(14px);
+    transform: scale(1.08);
+  }
+  .sec__collection-tab .ct-coming-soon .product__media:hover img,
+  .sec__collection-tab .ct-coming-soon .product-item__media--ratio:hover img {
+    transform: scale(1.08);
+  }
+  /* Hide product title (and everything else under the image card) when
+     the card is in the coming-soon state — keeps only the image + overlay. */
+  .sec__collection-tab .ct-coming-soon .product-card-information__title,
+  .sec__collection-tab .ct-coming-soon .product-card-title,
+  .sec__collection-tab .ct-coming-soon .card__heading,
+  .sec__collection-tab .ct-coming-soon .card__heading a,
+  .sec__collection-tab .ct-coming-soon .product-item .card__heading,
+  .sec__collection-tab .ct-coming-soon .product-card .card__heading,
+  .sec__collection-tab .ct-coming-soon .product-item .h5,
+  .sec__collection-tab .ct-coming-soon .product-item .h6,
+  .sec__collection-tab .ct-coming-soon .product-item__info,
+  .sec__collection-tab .ct-coming-soon .card-information {
+    visibility: hidden;
+  }
+  /* "COMING SOON" pill overlaid in the center of the blurred image. */
+  .sec__collection-tab .ct-coming-soon .product__media::after,
+  .sec__collection-tab .ct-coming-soon .product-item__media--ratio::after {
+    content: "COMING SOON";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 10px 22px;
+    font-family: 'Inter', var(--heading-font), sans-serif;
+    font-weight: 500;
+    font-size: 15px;
+    line-height: 1;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #111;
+    background-color: rgba(255, 255, 255, 0.88);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    border-radius: 999px;
+    box-shadow: 0 2px 14px rgba(0, 0, 0, 0.12);
+    pointer-events: none;
+    z-index: 2;
+    white-space: nowrap;
+  }
+
+  /* Per-product badge driven by `product.metafields.custom.product_badge`.
+     Rendered by snippets/product-item.liquid when `show_product_badge: true`
+     is passed; only this section passes it, so other product-item usages
+     aren't affected. Positioned top-left of the image per Figma spec. */
+  .sec__collection-tab .product-item__inner {
+    position: relative;
+  }
+  .sec__collection-tab .ct-product-badge {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    /* Figma's 95.75 is now the FLOOR (min-width), not a fixed width. Short
+       labels ("NEW", "SALE") still match the spec; longer merchant-set text
+       ("SAVE UP TO 32%", "MOVING CRAZY") expands the pill so text no longer
+       touches the rounded edges. */
+    width: auto;
+    min-width: 95.75px;
+    max-width: calc(100% - 28px);
+    height: 23.63px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 14px;
+    background-color: #A6BDDD;
+    color: #000;
+    border-radius: 16px;
+    font-family: 'Inter', var(--body-font), sans-serif;
+    font-weight: 500;
+    font-size: 11px;
+    line-height: 1;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    text-align: center;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 3;
+    box-sizing: border-box;
+  }
+  /* If a product is both coming-soon AND has a badge, keep the badge visible
+     (it's not under the coming-soon .visibility:hidden block because it sits
+     on the image, not on the info wrap below the image). */
+</style>
   </div>
 </div>
 {% schema %}

@@ -1,0 +1,483 @@
+{%- liquid
+  assign sec = section.settings
+  assign img_desktop = sec.image_desktop
+  assign img_mobile = sec.image_mobile
+-%}
+
+<div
+  id="refill-banner-{{ section.id }}"
+  class="refill-banner"
+  style="
+    --rb-overlay: {{ sec.overlay_color }};
+    --rb-overlay-opacity: {{ sec.overlay_opacity | default: 20 | divided_by: 100.0 }};
+    --rb-width-desktop: {{ sec.desktop_width | default: 1400 }}px;
+    --rb-height-desktop: {{ sec.desktop_height | default: 600 }}px;
+    --rb-height-mobile: {{ sec.mobile_height | default: 500 }}px;
+    --rb-mobile-width: {{ sec.mobile_width | default: 335 }}px;
+    --rb-radius: {{ sec.corner_radius | default: 14 }}px;
+    --rb-h-top-d: {{ sec.heading_top_desktop | default: 60 }}px;
+    --rb-h-left-d: {{ sec.heading_left_desktop | default: 50 }}px;
+    --rb-h-top-m: {{ sec.heading_top_mobile | default: 60 }}px;
+    --rb-h-left-m: {{ sec.heading_left_mobile | default: 20 }}px;
+    --rb-d-top-d: {{ sec.desc_top_desktop | default: 472 }}px;
+    --rb-d-left-d: {{ sec.desc_left_desktop | default: 500 }}px;
+    --rb-d-width-d: {{ sec.desc_width_desktop | default: 792 }}px;
+    --rb-d-top-m: {{ sec.desc_top_mobile | default: 350 }}px;
+    --rb-d-left-m: {{ sec.desc_left_mobile | default: 20 }}px;
+    --rb-d-width-m: {{ sec.desc_width_mobile | default: 296 }}px;
+    --rb-img-pos-d: {{ sec.image_position_desktop | default: 50 }}%;
+    --rb-img-pos-m: {{ sec.image_position_mobile | default: 50 }}%;
+    --rb-text-color: {{ sec.text_color }};
+    margin-top: {{ sec.margin_top_desktop | default: 0 }}px;
+    margin-bottom: {{ sec.margin_bottom_desktop | default: 0 }}px;
+  "
+>
+  <div class="refill-banner__inner">
+    {%- if img_desktop != blank -%}
+      <img
+        class="refill-banner__img refill-banner__img--desktop"
+        src="{{ img_desktop | image_url: width: 1800 }}"
+        alt="{{ sec.heading | escape }}"
+        loading="lazy"
+      >
+    {%- endif -%}
+    {%- if img_mobile != blank -%}
+      <img
+        class="refill-banner__img refill-banner__img--mobile"
+        src="{{ img_mobile | image_url: width: 800 }}"
+        alt="{{ sec.heading | escape }}"
+        loading="lazy"
+      >
+    {%- endif -%}
+    <div class="refill-banner__overlay" aria-hidden="true"></div>
+    {%- if sec.heading != blank -%}
+      <h2 class="refill-banner__heading">{{ sec.heading }}</h2>
+    {%- endif -%}
+    {%- if sec.description != blank -%}
+      <p class="refill-banner__desc">{{ sec.description }}</p>
+    {%- endif -%}
+  </div>
+</div>
+
+{% style %}
+  #refill-banner-{{ section.id }} {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0 20px;
+  }
+  #refill-banner-{{ section.id }} .refill-banner__inner {
+    position: relative;
+    width: 100%;
+    max-width: var(--rb-width-desktop, 1340px);
+    height: var(--rb-height-desktop);
+    margin: 0 auto;
+    border-radius: var(--rb-radius);
+    overflow: hidden;
+  }
+  #refill-banner-{{ section.id }} .refill-banner__img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% var(--rb-img-pos-d, 50%);
+    display: block;
+  }
+  #refill-banner-{{ section.id }} .refill-banner__img--mobile {
+    display: none;
+  }
+  #refill-banner-{{ section.id }} .refill-banner__overlay {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: var(--rb-overlay, #000);
+    opacity: var(--rb-overlay-opacity, 0.2);
+    pointer-events: none;
+  }
+  /* Heading — top-left anchored, white, Clash Display 40/30 uppercase */
+  #refill-banner-{{ section.id }} .refill-banner__heading {
+    position: absolute;
+    top: var(--rb-h-top-d);
+    left: var(--rb-h-left-d);
+    margin: 0;
+    color: var(--rb-text-color, #ffffff);
+    font-family: 'Inter', var(--heading-font), sans-serif;
+    font-weight: 500;
+    font-size: 40px;
+    line-height: 30px;
+    letter-spacing: 0;
+    text-transform: uppercase;
+    z-index: 2;
+  }
+  /* Description — Aeonik 18/22, right-aligned, white */
+  #refill-banner-{{ section.id }} .refill-banner__desc {
+    position: absolute;
+    top: var(--rb-d-top-d);
+    left: var(--rb-d-left-d);
+    width: var(--rb-d-width-d);
+    margin: 0;
+    color: var(--rb-text-color, #ffffff);
+    font-family: 'Inter', var(--body-font), sans-serif;
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 22px;
+    letter-spacing: 0;
+    text-align: right;
+    z-index: 2;
+  }
+  @media (max-width: 767.98px) {
+    #refill-banner-{{ section.id }} {
+      margin-top: {{ sec.margin_top_mobile | default: 0 }}px;
+      margin-bottom: {{ sec.margin_bottom_mobile | default: 0 }}px;
+      padding: 0 16px;
+    }
+    /* Banner spans the full content area on mobile (16px from each viewport
+       edge) to match the Scent Selector mobile layout. */
+    #refill-banner-{{ section.id }} .refill-banner__inner {
+      width: 100%;
+      max-width: 100%;
+      height: var(--rb-height-mobile);
+    }
+    #refill-banner-{{ section.id }} .refill-banner__img {
+      object-position: 50% var(--rb-img-pos-m, 50%);
+    }
+    #refill-banner-{{ section.id }} .refill-banner__img--desktop {
+      display: none;
+    }
+    #refill-banner-{{ section.id }} .refill-banner__img--mobile {
+      display: block;
+    }
+    /* If only desktop image exists, fall back to it on mobile */
+    #refill-banner-{{ section.id }} .refill-banner__inner:not(:has(.refill-banner__img--mobile)) .refill-banner__img--desktop {
+      display: block;
+    }
+    #refill-banner-{{ section.id }} .refill-banner__heading {
+      top: var(--rb-h-top-m);
+      left: var(--rb-h-left-m);
+      font-size: 24px;
+      line-height: 24px;
+    }
+    #refill-banner-{{ section.id }} .refill-banner__desc {
+      top: var(--rb-d-top-m);
+      left: var(--rb-d-left-m);
+      width: var(--rb-d-width-m);
+      font-size: 14px;
+      line-height: 18px;
+      text-align: center;
+    }
+  }
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "Refill Banner",
+  "tag": "section",
+  "disabled_on": {
+    "groups": ["header", "footer", "custom.overlay"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_desktop",
+      "label": "Background image — Desktop"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_mobile",
+      "label": "Background image — Mobile (optional)",
+      "info": "Falls back to the desktop image if blank."
+    },
+    {
+      "type": "range",
+      "id": "image_position_desktop",
+      "label": "Image vertical position — Desktop",
+      "info": "0 = show the top of the image, 50 = centre, 100 = show the bottom. Use this to crop out a dark sky or watermark area.",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "%",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "image_position_mobile",
+      "label": "Image vertical position — Mobile",
+      "info": "Same as the desktop control but applied on mobile only.",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "%",
+      "default": 50
+    },
+    {
+      "type": "color",
+      "id": "overlay_color",
+      "label": "Overlay color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "Overlay opacity",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "REFILL, NOT REPLACE"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "When it runs out, you don't start over—you keep the case and replace only what's needed. Twist out, click in, and you're ready again in seconds. No excess, no waste—just a simple, intentional way that fits seamlessly into your routine."
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "Banner size"
+    },
+    {
+      "type": "range",
+      "id": "desktop_width",
+      "label": "Banner width — Desktop",
+      "info": "Maximum content width on desktop. Centered with auto margins. Default 1400 matches the other starter-pack sections.",
+      "min": 600,
+      "max": 1500,
+      "step": 10,
+      "unit": "px",
+      "default": 1400
+    },
+    {
+      "type": "range",
+      "id": "desktop_height",
+      "label": "Banner height — Desktop",
+      "min": 200,
+      "max": 1000,
+      "step": 10,
+      "unit": "px",
+      "default": 600
+    },
+    {
+      "type": "range",
+      "id": "mobile_height",
+      "label": "Banner height — Mobile",
+      "min": 200,
+      "max": 800,
+      "step": 10,
+      "unit": "px",
+      "default": 500
+    },
+    {
+      "type": "range",
+      "id": "mobile_width",
+      "label": "Banner width — Mobile",
+      "info": "Per Figma: 335px. Banner caps at 100% of the available column on smaller phones.",
+      "min": 200,
+      "max": 500,
+      "step": 5,
+      "unit": "px",
+      "default": 335
+    },
+    {
+      "type": "range",
+      "id": "corner_radius",
+      "label": "Corner radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "header",
+      "content": "Heading position — Desktop"
+    },
+    {
+      "type": "range",
+      "id": "heading_top_desktop",
+      "label": "Heading — distance from top",
+      "info": "Drag down (positive) to move heading lower on the banner.",
+      "min": 0,
+      "max": 500,
+      "step": 5,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "heading_left_desktop",
+      "label": "Heading — distance from left",
+      "info": "Drag up (positive) to move heading further from the left edge.",
+      "min": 0,
+      "max": 1000,
+      "step": 10,
+      "unit": "px",
+      "default": 50
+    },
+    {
+      "type": "header",
+      "content": "Heading position — Mobile"
+    },
+    {
+      "type": "range",
+      "id": "heading_top_mobile",
+      "label": "Heading — distance from top",
+      "min": 0,
+      "max": 400,
+      "step": 4,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "heading_left_mobile",
+      "label": "Heading — distance from left",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Description position — Desktop"
+    },
+    {
+      "type": "range",
+      "id": "desc_top_desktop",
+      "label": "Description — distance from top",
+      "min": 0,
+      "max": 800,
+      "step": 8,
+      "unit": "px",
+      "default": 472
+    },
+    {
+      "type": "range",
+      "id": "desc_left_desktop",
+      "label": "Description — distance from left",
+      "min": 0,
+      "max": 1000,
+      "step": 10,
+      "unit": "px",
+      "default": 500
+    },
+    {
+      "type": "range",
+      "id": "desc_width_desktop",
+      "label": "Description — box width",
+      "info": "Right-aligned text wraps inside this width.",
+      "min": 200,
+      "max": 1000,
+      "step": 8,
+      "unit": "px",
+      "default": 792
+    },
+    {
+      "type": "header",
+      "content": "Description position — Mobile"
+    },
+    {
+      "type": "range",
+      "id": "desc_top_mobile",
+      "label": "Description — distance from top",
+      "min": 0,
+      "max": 500,
+      "step": 5,
+      "unit": "px",
+      "default": 350
+    },
+    {
+      "type": "range",
+      "id": "desc_left_mobile",
+      "label": "Description — distance from left",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "desc_width_mobile",
+      "label": "Description — box width",
+      "min": 100,
+      "max": 400,
+      "step": 4,
+      "unit": "px",
+      "default": 296
+    },
+    {
+      "type": "header",
+      "content": "Section spacing"
+    },
+    {
+      "type": "range",
+      "id": "margin_top_desktop",
+      "label": "Top margin — Desktop",
+      "min": -200,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_desktop",
+      "label": "Bottom margin — Desktop",
+      "min": -200,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "margin_top_mobile",
+      "label": "Top margin — Mobile",
+      "min": -200,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_mobile",
+      "label": "Bottom margin — Mobile",
+      "min": -200,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Refill Banner"
+    }
+  ]
+}
+{% endschema %}

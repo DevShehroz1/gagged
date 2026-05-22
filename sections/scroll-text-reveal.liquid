@@ -1,0 +1,347 @@
+{%- capture style -%}
+  --section-pt: {{ section.settings.padding_top }}; --section-pb: {{ section.settings.padding_bottom }};
+{%- endcapture -%}
+
+{%- liquid
+  assign text = section.settings.text
+  assign words = text | split: ' '
+  assign underline_word = section.settings.underline_word
+  assign bg_color = section.settings.bg_color
+  assign button_label = section.settings.button_label
+  assign button_link = section.settings.button_link
+-%}
+
+{%- style -%}
+  .scroll-text-reveal .str__outer {
+    position: relative;
+    /* Desktop scroll runway: long enough for a slow reveal */
+    min-height: 2400px;
+  }
+  .scroll-text-reveal .str__sticky {
+    position: sticky;
+    top: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    background-color: {{ bg_color }};
+    overflow: hidden;
+  }
+  .scroll-text-reveal .str__inner {
+    text-align: center;
+    max-width: 1200px;
+    /* Top padding clears the header (which floats above the pinned
+       section) so the image doesn't get clipped by the logo/nav bar.
+       Bottom stays tight so image + text + CTA still fit in 100vh. */
+    padding: 104px 30px 40px;
+    width: 100%;
+  }
+  .scroll-text-reveal .str__image {
+    /* Was 100px — trimmed so the block stays within a single viewport. */
+    margin: 0 0 36px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .scroll-text-reveal .str__image img {
+    width: 322px;
+    height: 240px;
+    max-width: 322px;
+    margin: 0 auto;
+    display: block;
+    object-fit: contain;
+    opacity: 1;
+    transform: rotate({{ section.settings.image_rotation | default: 10 }}deg);
+    transition: transform 0.3s ease;
+  }
+  .scroll-text-reveal .str__text {
+    font-family: 'Inter', var(--heading-font), sans-serif;
+    font-weight: 500;
+    font-style: normal;
+    text-transform: uppercase;
+    font-size: 40px;
+    line-height: 50px;
+    letter-spacing: 0;
+    word-spacing: normal;
+    margin: 0 0 40px 0;
+    text-align: center;
+    vertical-align: middle;
+  }
+  .scroll-text-reveal .str__word {
+    color: #ccc;
+    transition: color 0.3s ease;
+  }
+  .scroll-text-reveal .str__underline-wrap {
+    position: relative;
+    display: inline-block;
+  }
+  .scroll-text-reveal .str__underline-svg {
+    position: absolute;
+    bottom: -8px;
+    left: -5%;
+    width: 110%;
+    height: 30px;
+    pointer-events: none;
+  }
+  .scroll-text-reveal .str__underline-svg path {
+    transition: opacity 0.5s ease;
+  }
+  .scroll-text-reveal .str__space {
+    display: inline-block;
+    width: 0.25em;
+  }
+  .scroll-text-reveal .str__cta {
+    /* CTA is visible from the start so the image + text + CTA all read
+       as one composed layout on first look. Previously it faded in only
+       once scroll progress reached ~75%, which meant a customer on a
+       short laptop viewport couldn't see it until the animation had
+       almost finished. */
+    opacity: 1;
+    transform: none;
+  }
+  /* Progressive enhancement: if JS is disabled, show all words in final state */
+  .scroll-text-reveal:not(.is-ready) .str__word { color: #111; }
+  .scroll-text-reveal:not(.is-ready) .str__underline-svg path { opacity: 1; }
+
+  @media (max-width: 767.98px) {
+    .scroll-text-reveal .str__outer {
+      /* Shorter runway on mobile so the reveal feels snappy, not endless */
+      min-height: 180vh;
+    }
+    .scroll-text-reveal .str__inner {
+      /* Bumped up from 72 so the stamp image's top edge sits well clear of
+         the mobile header / any transparent nav overlay. Still leaves room
+         for image + text + CTA in one viewport. */
+      padding: 100px 20px 24px;
+    }
+    .scroll-text-reveal .str__image {
+      margin: 0 0 18px;
+    }
+    .scroll-text-reveal .str__image img {
+      width: 220px;
+      height: 164px;
+      max-width: 220px;
+    }
+    .scroll-text-reveal .str__text {
+      font-size: 28px;
+      line-height: 36px;
+      margin: 0 0 28px 0;
+    }
+    .scroll-text-reveal .str__underline-svg {
+      bottom: -4px;
+      height: 18px;
+    }
+  }
+{%- endstyle -%}
+
+<section
+  class="section scroll-text-reveal"
+  style="{{ style | strip | strip_newlines }}"
+>
+  <div class="str__outer">
+    <div class="str__sticky">
+      <div class="str__inner">
+        {%- if section.settings.image != blank -%}
+          <div class="str__image">
+            <img
+              src="{{ section.settings.image | image_url: width: 644 }}"
+              alt="{{ section.settings.heading | default: 'image' }}"
+              width="322"
+              height="240"
+              loading="lazy"
+            >
+          </div>
+        {%- endif -%}
+        <h2 class="str__text">
+          {%- for word in words -%}{%- if word == underline_word -%}<span class="str__word str__underline-wrap" data-index="{{ forloop.index0 }}">{{ word }}<svg class="str__underline-svg" viewBox="0 0 200 20" preserveAspectRatio="none"><path d="M5 12 Q50 3, 100 10 Q150 18, 195 8" stroke="#b8a0d4" stroke-width="8" fill="none" stroke-linecap="round" opacity="0"/></svg></span>{%- else -%}<span class="str__word" data-index="{{ forloop.index0 }}">{{ word }}</span>{%- endif -%}{%- unless forloop.last -%}<span class="str__space">&nbsp;</span>{%- endunless -%}{%- endfor -%}
+        </h2>
+        {%- if button_label != blank -%}
+          <div class="str__cta">
+            <a href="{{ button_link | default: '/collections/all' }}" class="str__cta-btn-glass" style="position: relative; display: inline-flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.04); backdrop-filter: blur(28px) saturate(180%); -webkit-backdrop-filter: blur(28px) saturate(180%); border: 1px solid rgba(0, 0, 0, 0.12); color: #111; border-radius: 999px; padding: 16px 40px; font-family: 'Inter', var(--heading-font), sans-serif; font-size: 12px; font-weight: 500; line-height: 16px; letter-spacing: 0.96px; text-transform: uppercase; text-align: center; box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.9), inset 0 -1px 1px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.08); transition: all 0.3s ease; overflow: hidden; text-decoration: none;">
+              <span style="position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 40%, rgba(255, 255, 255, 0) 60%, rgba(255, 255, 255, 0.2) 100%); pointer-events: none;"></span>
+              <span style="position: relative; z-index: 1;">{{ button_label }}</span>
+            </a>
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  (function() {
+    const sections = document.querySelectorAll('.scroll-text-reveal');
+    if (!sections.length) return;
+
+    sections.forEach(function(section) {
+      const outer = section.querySelector('.str__outer');
+      const words = section.querySelectorAll('.str__word');
+      const underlineSvgPath = section.querySelector('.str__underline-svg path');
+      const cta = section.querySelector('.str__cta');
+      const totalWords = words.length;
+      if (!outer || !totalWords) return;
+
+      // Mark as JS-ready: the pre-JS state shows all words fully black (via CSS
+      // `:not(.is-ready)`), so text is still readable if JS fails. Once ready,
+      // the reveal controls the word colors.
+      section.classList.add('is-ready');
+
+      let ticking = false;
+      let lastProgress = -1;
+      let lastWordsRevealed = -1;
+
+      function update() {
+        ticking = false;
+
+        const rect = outer.getBoundingClientRect();
+        const outerHeight = rect.height;
+        const viewHeight = window.innerHeight || document.documentElement.clientHeight;
+
+        // scrollRange is the distance over which the sticky child stays pinned
+        // and we can animate the reveal. Guard against zero/negative (e.g. when
+        // section shorter than viewport).
+        const scrollRange = outerHeight - viewHeight;
+        if (scrollRange <= 0) {
+          // Section is shorter than viewport: just fully reveal everything.
+          applyReveal(1);
+          return;
+        }
+
+        // rect.top is the distance from viewport top to outer's top.
+        // When outer.top = 0 -> progress 0 (start).
+        // When outer.top = -scrollRange -> progress 1 (end).
+        const scrolled = -rect.top;
+        const progress = Math.max(0, Math.min(1, scrolled / scrollRange));
+        applyReveal(progress);
+      }
+
+      function applyReveal(progress) {
+        // Reveal slightly ahead of pure linear so the last words finish before
+        // the section scrolls out. 1.25x means fully revealed at progress ~0.8.
+        const wordProgress = Math.min(1, progress * 1.25);
+        const wordsToReveal = Math.floor(wordProgress * totalWords);
+
+        if (wordsToReveal !== lastWordsRevealed) {
+          lastWordsRevealed = wordsToReveal;
+          for (let i = 0; i < totalWords; i++) {
+            words[i].style.color = (i < wordsToReveal) ? '#111' : '#ccc';
+          }
+          if (underlineSvgPath) {
+            const underlineParent = underlineSvgPath.closest('.str__word');
+            if (underlineParent) {
+              const idx = parseInt(underlineParent.dataset.index, 10);
+              underlineSvgPath.style.opacity = (idx < wordsToReveal) ? '1' : '0';
+            }
+          }
+        }
+
+        // CTA visibility used to be gated by progress > 0.75 here. Removed
+        // so the CTA stays visible alongside the image + text from the start
+        // regardless of scroll position. Word reveal still progresses via
+        // the color tween above.
+        lastProgress = progress;
+      }
+
+      function requestUpdate() {
+        if (ticking) return;
+        ticking = true;
+        window.requestAnimationFrame(update);
+      }
+
+      // Listen on both window scroll and resize. Use passive listeners so we
+      // never block mobile scrolling. rAF keeps us at 60fps max.
+      window.addEventListener('scroll', requestUpdate, { passive: true });
+      window.addEventListener('resize', requestUpdate, { passive: true });
+      window.addEventListener('orientationchange', requestUpdate, { passive: true });
+
+      // Prime initial state. Also re-run after load in case images/fonts shift layout.
+      requestUpdate();
+      if (document.readyState === 'complete') {
+        requestUpdate();
+      } else {
+        window.addEventListener('load', requestUpdate, { once: true });
+      }
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Scroll Text Reveal",
+  "tag": "section",
+  "disabled_on": {
+    "groups": ["header", "footer", "custom.overlay"]
+  },
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Top image"
+    },
+    {
+      "type": "range",
+      "id": "image_rotation",
+      "label": "Image rotation",
+      "min": -45,
+      "max": 45,
+      "step": 1,
+      "unit": "deg",
+      "default": -6
+    },
+    {
+      "type": "textarea",
+      "id": "text",
+      "label": "Text",
+      "default": "The scent that actually works not just for minutes, but all day. It blends with your skin, evolves with your body, and lasts where others fade. Built for heat, humidity, and real life. Subtle, effortless, and always there."
+    },
+    {
+      "type": "text",
+      "id": "underline_word",
+      "label": "Word to underline (purple)",
+      "default": "seamlessly,"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background color",
+      "default": "#eaeaee"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "Shop Our Products"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "default": 0,
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "default": 0,
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Scroll Text Reveal"
+    }
+  ]
+}
+{% endschema %}

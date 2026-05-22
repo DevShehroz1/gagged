@@ -1,0 +1,995 @@
+{%- liquid
+  assign s = section.settings
+  if s.reset_spacing
+    assign reset_spacing = ' remove_spacing'
+  endif
+
+  assign side_class = ''
+  if s.image_side == 'left'
+    assign side_class = ' os3--image-left'
+  endif
+
+  assign heading_color    = s.heading_color    | default: s.text_color
+  assign emphasis_color   = s.emphasis_color   | default: s.text_color
+  assign description_color = s.description_color | default: s.text_color
+  assign divider_color    = s.divider_color    | default: s.text_color
+  assign point_color      = s.point_color      | default: s.text_color
+
+  assign rendered_heading = s.heading | replace: '|', '<br>'
+  if s.emphasis_words != blank
+    assign emphasis_list = s.emphasis_words | split: ','
+    for word in emphasis_list
+      assign w = word | strip
+      if w != blank
+        capture wrapped
+          echo '<span class="os3__emphasis">'
+          echo w
+          echo '</span>'
+        endcapture
+        assign rendered_heading = rendered_heading | replace: w, wrapped
+      endif
+    endfor
+  endif
+
+  assign rendered_description = s.description | replace: '|', '<br>'
+-%}
+
+<div
+  class="os3{{ reset_spacing }}{{ side_class }}"
+  style="background-color: {{ s.bg_color }};"
+>
+  <div class="os3__inner">
+    <div class="os3__text">
+      {%- if s.heading != blank -%}
+        <p class="os3__heading">
+          {%- assign heading_lines = rendered_heading | split: '<br>' -%}
+          {%- for line in heading_lines -%}
+            <span class="os3__line">{{ line | strip }}</span>
+          {%- endfor -%}
+        </p>
+      {%- endif -%}
+      {%- if s.show_divider -%}
+        <hr class="os3__divider">
+      {%- endif -%}
+      {%- if s.description != blank -%}
+        <p class="os3__desc">
+          {%- assign desc_lines = rendered_description | split: '<br>' -%}
+          {%- for line in desc_lines -%}
+            <span class="os3__line">{{ line | strip }}</span>
+          {%- endfor -%}
+        </p>
+      {%- endif -%}
+      {%- if section.blocks.size > 0 -%}
+        <ul class="os3__points">
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'point' -%}
+              {%- assign b = block.settings -%}
+              <li class="os3__point" {{ block.shopify_attributes }}>
+                <span class="os3__point-icon" aria-hidden="true">
+                  {%- if b.icon != blank -%}
+                    {{
+                      b.icon
+                      | image_url: width: 64
+                      | image_tag:
+                        loading: 'lazy',
+                        alt: b.icon.alt | default: '',
+                        class: 'os3__point-icon-img',
+                        widths: '32, 64'
+                    }}
+                  {%- endif -%}
+                </span>
+                {%- if b.text != blank -%}
+                  <span class="os3__point-text">{{ b.text }}</span>
+                {%- endif -%}
+              </li>
+            {%- endif -%}
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+    </div>
+    <div class="os3__media">
+      {%- if s.image != blank -%}
+        {{
+          s.image
+          | image_url: width: 1400
+          | image_tag:
+            loading: 'lazy',
+            alt: s.image.alt | default: 'Story',
+            class: 'os3__img',
+            widths: '480, 720, 1080, 1400',
+            sizes: '(max-width: 767px) 100vw, 50vw'
+        }}
+      {%- else -%}
+        <span class="os3__img os3__img--placeholder" aria-hidden="true"></span>
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+
+{% style %}
+  #shopify-section-{{ section.id }} br {
+    display: inline;
+  }
+  #shopify-section-{{ section.id }} .os3 {
+    overflow: hidden;
+    padding-top: {{ s.padding_top_desktop | default: 80 }}px;
+    padding-bottom: {{ s.padding_bottom_desktop | default: 80 }}px;
+    margin-top: {{ s.margin_top_desktop | default: 0 }}px;
+    margin-bottom: {{ s.margin_bottom_desktop | default: 0 }}px;
+  }
+  #shopify-section-{{ section.id }} .os3__inner {
+    display: grid;
+    grid-template-columns: {{ s.text_col_pct_desktop | default: 45 }}% 1fr;
+    gap: {{ s.column_gap_desktop | default: 60 }}px;
+    align-items: center;
+    max-width: {{ s.section_max_width_desktop | default: 1280 }}px;
+    margin: 0 auto;
+    padding-left: {{ s.section_side_padding_desktop | default: 40 }}px;
+    padding-right: {{ s.section_side_padding_desktop | default: 40 }}px;
+    box-sizing: border-box;
+  }
+  #shopify-section-{{ section.id }} .os3--image-left .os3__inner {
+    grid-template-columns: 1fr {{ s.text_col_pct_desktop | default: 45 }}%;
+  }
+  #shopify-section-{{ section.id }} .os3--image-left .os3__text { order: 2; }
+  #shopify-section-{{ section.id }} .os3--image-left .os3__media { order: 1; }
+
+  /* Text column */
+  #shopify-section-{{ section.id }} .os3__text {
+    display: flex;
+    flex-direction: column;
+    gap: {{ s.text_gap_desktop | default: 24 }}px;
+  }
+  #shopify-section-{{ section.id }} .os3__heading {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    font-weight: {{ s.heading_weight | default: 400 }};
+    font-size: {{ s.heading_size_desktop | default: 16 }}px;
+    line-height: {{ s.heading_line_height_desktop | default: 22 }}px;
+    letter-spacing: 0;
+    text-align: {{ s.text_align | default: 'justify' }};
+    color: {{ heading_color }};
+    {%- if s.heading_max_width_desktop and s.heading_max_width_desktop > 0 %}
+    max-width: {{ s.heading_max_width_desktop }}px;
+    {%- endif %}
+  }
+  /* Each `|` segment renders as a block-level span so the line breaks
+     match the customizer copy. We deliberately do NOT force
+     text-align-last: justify here — that was stretching every
+     `|`-broken line to the full container width and producing wide
+     word gaps in the heading. Words now sit at natural spacing. */
+  #shopify-section-{{ section.id }} .os3__line {
+    display: block;
+  }
+  #shopify-section-{{ section.id }} .os3__heading .os3__emphasis {
+    font-weight: {{ s.emphasis_weight | default: 700 }};
+    font-style: italic;
+    color: {{ emphasis_color }};
+  }
+  #shopify-section-{{ section.id }} .os3__divider {
+    width: {{ s.divider_width | default: 60 }}px;
+    height: 0;
+    border: none;
+    border-top: {{ s.divider_thickness | default: 1 }}px solid {{ divider_color }};
+    margin: {{ s.divider_margin_top | default: 4 }}px 0 {{ s.divider_margin_bottom | default: 4 }}px;
+    opacity: 1;
+  }
+  #shopify-section-{{ section.id }} .os3__desc {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    font-size: {{ s.description_size_desktop | default: 13 }}px;
+    line-height: {{ s.description_line_height_desktop | default: 20 }}px;
+    letter-spacing: 0;
+    text-align: {{ s.text_align | default: 'justify' }};
+    color: {{ description_color }};
+    {%- if s.description_max_width_desktop and s.description_max_width_desktop > 0 %}
+    max-width: {{ s.description_max_width_desktop }}px;
+    {%- endif %}
+  }
+  #shopify-section-{{ section.id }} .os3__points {
+    list-style: none;
+    margin: {{ s.points_margin_top_desktop | default: 16 }}px 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: {{ s.point_gap_desktop | default: 14 }}px;
+  }
+  #shopify-section-{{ section.id }} .os3__point {
+    display: flex;
+    align-items: center;
+    gap: {{ s.icon_text_gap_desktop | default: 16 }}px;
+    color: {{ point_color }};
+    font-family: 'Inter', sans-serif;
+    font-weight: {{ s.point_weight | default: 400 }};
+    font-size: {{ s.point_size_desktop | default: 13 }}px;
+    line-height: 1.4;
+    letter-spacing: 0;
+  }
+  #shopify-section-{{ section.id }} .os3__point-icon {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: {{ s.icon_size_desktop | default: 16 }}px;
+    height: {{ s.icon_size_desktop | default: 16 }}px;
+  }
+  #shopify-section-{{ section.id }} .os3__point-icon-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+  #shopify-section-{{ section.id }} .os3__point-text {
+    color: inherit;
+  }
+
+  /* Image column */
+  #shopify-section-{{ section.id }} .os3__media {
+    width: {{ s.image_width_desktop | default: 100 }}%;
+    max-width: 100%;
+    height: {{ s.image_min_height_desktop | default: 480 }}px;
+    align-self: center;
+    overflow: hidden;
+    border-radius: {{ s.image_radius | default: 0 }}px;
+  }
+  #shopify-section-{{ section.id }} .os3__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  #shopify-section-{{ section.id }} .os3__img--placeholder {
+    background: #2a2a2a;
+    aspect-ratio: 4 / 5;
+  }
+
+  /* Mobile */
+  @media screen and (max-width: 767px) {
+    #shopify-section-{{ section.id }} .os3 {
+      padding-top: {{ s.padding_top_mobile | default: 40 }}px;
+      padding-bottom: {{ s.padding_bottom_mobile | default: 40 }}px;
+      margin-top: {{ s.margin_top_mobile | default: 0 }}px;
+      margin-bottom: {{ s.margin_bottom_mobile | default: 0 }}px;
+    }
+    #shopify-section-{{ section.id }} .os3__inner,
+    #shopify-section-{{ section.id }} .os3--image-left .os3__inner {
+      grid-template-columns: 1fr;
+      gap: {{ s.column_gap_mobile | default: 32 }}px;
+      padding-left: {{ s.section_side_padding_mobile | default: 20 }}px;
+      padding-right: {{ s.section_side_padding_mobile | default: 20 }}px;
+    }
+    #shopify-section-{{ section.id }} .os3__text,
+    #shopify-section-{{ section.id }} .os3--image-left .os3__text {
+      order: {{ s.mobile_text_order | default: 1 }};
+      gap: {{ s.text_gap_mobile | default: 18 }}px;
+    }
+    #shopify-section-{{ section.id }} .os3__media,
+    #shopify-section-{{ section.id }} .os3--image-left .os3__media {
+      order: {{ s.mobile_media_order | default: 2 }};
+      width: {{ s.image_width_mobile | default: 100 }}%;
+      max-width: 100%;
+      height: {{ s.image_min_height_mobile | default: 320 }}px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    #shopify-section-{{ section.id }} .os3__heading {
+      font-size: {{ s.heading_size_mobile | default: 15 }}px;
+      line-height: {{ s.heading_line_height_mobile | default: 22 }}px;
+      {%- if s.heading_max_width_mobile and s.heading_max_width_mobile > 0 %}
+      max-width: {{ s.heading_max_width_mobile }}px;
+      {%- endif %}
+    }
+    #shopify-section-{{ section.id }} .os3__desc {
+      font-size: {{ s.description_size_mobile | default: 13 }}px;
+      line-height: {{ s.description_line_height_mobile | default: 20 }}px;
+      {%- if s.description_max_width_mobile and s.description_max_width_mobile > 0 %}
+      max-width: {{ s.description_max_width_mobile }}px;
+      {%- endif %}
+    }
+    #shopify-section-{{ section.id }} .os3__points {
+      margin-top: {{ s.points_margin_top_mobile | default: 12 }}px;
+      gap: {{ s.point_gap_mobile | default: 12 }}px;
+    }
+    #shopify-section-{{ section.id }} .os3__point {
+      gap: {{ s.icon_text_gap_mobile | default: 14 }}px;
+      font-size: {{ s.point_size_mobile | default: 13 }}px;
+    }
+    #shopify-section-{{ section.id }} .os3__point-icon {
+      width: {{ s.icon_size_mobile | default: 16 }}px;
+      height: {{ s.icon_size_mobile | default: 16 }}px;
+    }
+  }
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "Our Story 3",
+  "tag": "section",
+  "disabled_on": {
+    "groups": ["header", "footer", "custom.overlay"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Background + base text"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background color",
+      "default": "#2a2f3a"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Default text color (fallback)",
+      "info": "Used for heading, description, points, divider when no individual color is set.",
+      "default": "#ffffff"
+    },
+    {
+      "type": "select",
+      "id": "text_align",
+      "label": "Text alignment",
+      "default": "justify",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "justify", "label": "Justify" },
+        { "value": "center", "label": "Center" }
+      ]
+    },
+
+    { "type": "header", "content": "Heading paragraph" },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading text",
+      "info": "Use | for a forced line break (e.g. \"first line | second line\").",
+      "default": "Our products are formulated in India in collaboration with highly-sought product developers, award-winning fragrance 'profiles, and world-renowned category scientists."
+    },
+    {
+      "type": "text",
+      "id": "emphasis_words",
+      "label": "Bold + italic word(s)",
+      "info": "Comma-separated. Each match in the heading is rendered bold + italic with the emphasis color below.",
+      "default": "product developers, award-winning fragrance 'profiles, category scientists"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "info": "Leave empty to fall back to the default text color."
+    },
+    {
+      "type": "color",
+      "id": "emphasis_color",
+      "label": "Emphasis (bold+italic) color",
+      "info": "Color for the words listed above. Leave empty to fall back to the default text color."
+    },
+    {
+      "type": "select",
+      "id": "heading_weight",
+      "label": "Heading weight",
+      "default": "400",
+      "options": [
+        { "value": "300", "label": "Light" },
+        { "value": "400", "label": "Regular" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semi-bold" },
+        { "value": "700", "label": "Bold" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "emphasis_weight",
+      "label": "Emphasis weight",
+      "default": "700",
+      "options": [
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semi-bold" },
+        { "value": "700", "label": "Bold" },
+        { "value": "800", "label": "Extra-bold" }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "heading_size_desktop",
+      "label": "Heading size — Desktop",
+      "default": 16,
+      "min": 10,
+      "max": 32,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "heading_size_mobile",
+      "label": "Heading size — Mobile",
+      "default": 15,
+      "min": 10,
+      "max": 28,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "heading_line_height_desktop",
+      "label": "Heading line height — Desktop",
+      "default": 22,
+      "min": 14,
+      "max": 48,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "heading_line_height_mobile",
+      "label": "Heading line height — Mobile",
+      "default": 22,
+      "min": 14,
+      "max": 40,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "heading_max_width_desktop",
+      "label": "Heading max width — Desktop (0 = none)",
+      "default": 0,
+      "min": 0,
+      "max": 800,
+      "step": 10,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "heading_max_width_mobile",
+      "label": "Heading max width — Mobile (0 = none)",
+      "default": 0,
+      "min": 0,
+      "max": 600,
+      "step": 10,
+      "unit": "px"
+    },
+
+    { "type": "header", "content": "Divider" },
+    {
+      "type": "checkbox",
+      "id": "show_divider",
+      "label": "Show divider line",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "divider_color",
+      "label": "Divider color"
+    },
+    {
+      "type": "range",
+      "id": "divider_width",
+      "label": "Divider width",
+      "default": 60,
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "divider_thickness",
+      "label": "Divider thickness",
+      "default": 1,
+      "min": 1,
+      "max": 6,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "divider_margin_top",
+      "label": "Divider — space above",
+      "default": 4,
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "divider_margin_bottom",
+      "label": "Divider — space below",
+      "default": 4,
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px"
+    },
+
+    { "type": "header", "content": "Description paragraph" },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description text",
+      "info": "Use | for a forced line break.",
+      "default": "We source materials from global suppliers with a focus on procuring the highest quality while tracing back to the ingredient's origin whenever possible. This labor of love results in"
+    },
+    {
+      "type": "color",
+      "id": "description_color",
+      "label": "Description color",
+      "info": "Leave empty to fall back to the default text color."
+    },
+    {
+      "type": "range",
+      "id": "description_size_desktop",
+      "label": "Description size — Desktop",
+      "default": 18,
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "description_size_mobile",
+      "label": "Description size — Mobile",
+      "default": 16,
+      "min": 10,
+      "max": 22,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "description_line_height_desktop",
+      "label": "Description line height — Desktop",
+      "default": 28,
+      "min": 14,
+      "max": 40,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "description_line_height_mobile",
+      "label": "Description line height — Mobile",
+      "default": 24,
+      "min": 14,
+      "max": 36,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "description_max_width_desktop",
+      "label": "Description max width — Desktop (0 = none)",
+      "default": 0,
+      "min": 0,
+      "max": 800,
+      "step": 10,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "description_max_width_mobile",
+      "label": "Description max width — Mobile (0 = none)",
+      "default": 0,
+      "min": 0,
+      "max": 600,
+      "step": 10,
+      "unit": "px"
+    },
+
+    { "type": "header", "content": "Icon points" },
+    {
+      "type": "color",
+      "id": "point_color",
+      "label": "Point text color",
+      "info": "Leave empty to fall back to the default text color."
+    },
+    {
+      "type": "select",
+      "id": "point_weight",
+      "label": "Point text weight",
+      "default": "400",
+      "options": [
+        { "value": "300", "label": "Light" },
+        { "value": "400", "label": "Regular" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semi-bold" }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "point_size_desktop",
+      "label": "Point text size — Desktop",
+      "default": 16,
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "point_size_mobile",
+      "label": "Point text size — Mobile",
+      "default": 16,
+      "min": 10,
+      "max": 22,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "icon_size_desktop",
+      "label": "Icon size — Desktop",
+      "default": 28,
+      "min": 8,
+      "max": 80,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "icon_size_mobile",
+      "label": "Icon size — Mobile",
+      "default": 24,
+      "min": 8,
+      "max": 64,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "icon_text_gap_desktop",
+      "label": "Icon ↔ text gap — Desktop",
+      "default": 16,
+      "min": 0,
+      "max": 40,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "icon_text_gap_mobile",
+      "label": "Icon ↔ text gap — Mobile",
+      "default": 14,
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "point_gap_desktop",
+      "label": "Gap between points — Desktop",
+      "default": 14,
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "point_gap_mobile",
+      "label": "Gap between points — Mobile",
+      "default": 12,
+      "min": 0,
+      "max": 48,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "points_margin_top_desktop",
+      "label": "Space above points — Desktop",
+      "default": 16,
+      "min": 0,
+      "max": 80,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "points_margin_top_mobile",
+      "label": "Space above points — Mobile",
+      "default": 12,
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px"
+    },
+
+    { "type": "header", "content": "Image" },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "select",
+      "id": "image_side",
+      "label": "Image side (desktop)",
+      "default": "right",
+      "options": [
+        { "value": "right", "label": "Right" },
+        { "value": "left", "label": "Left" }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "image_min_height_desktop",
+      "label": "Image height — Desktop",
+      "info": "Sets the actual height of the image (no longer just a minimum). Reduce to make the image smaller.",
+      "default": 480,
+      "min": 120,
+      "max": 900,
+      "step": 10,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "image_min_height_mobile",
+      "label": "Image height — Mobile",
+      "default": 320,
+      "min": 120,
+      "max": 700,
+      "step": 10,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "image_width_desktop",
+      "label": "Image width — Desktop",
+      "info": "Percent of the image column. 100 = full column, lower values shrink the image and add side margin.",
+      "default": 100,
+      "min": 30,
+      "max": 100,
+      "step": 1,
+      "unit": "%"
+    },
+    {
+      "type": "range",
+      "id": "image_width_mobile",
+      "label": "Image width — Mobile",
+      "default": 100,
+      "min": 30,
+      "max": 100,
+      "step": 1,
+      "unit": "%"
+    },
+    {
+      "type": "range",
+      "id": "image_radius",
+      "label": "Image corner radius",
+      "default": 0,
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px"
+    },
+
+    { "type": "header", "content": "Layout" },
+    {
+      "type": "range",
+      "id": "section_max_width_desktop",
+      "label": "Section max width — Desktop",
+      "default": 1280,
+      "min": 600,
+      "max": 1800,
+      "step": 20,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "section_side_padding_desktop",
+      "label": "Section side padding — Desktop",
+      "default": 40,
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "section_side_padding_mobile",
+      "label": "Section side padding — Mobile",
+      "default": 20,
+      "min": 0,
+      "max": 80,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "text_col_pct_desktop",
+      "label": "Text column width — Desktop",
+      "info": "Percent of the section width allocated to the text column.",
+      "default": 45,
+      "min": 25,
+      "max": 65,
+      "step": 1,
+      "unit": "%"
+    },
+    {
+      "type": "range",
+      "id": "column_gap_desktop",
+      "label": "Gap between text and image — Desktop",
+      "default": 60,
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "column_gap_mobile",
+      "label": "Gap between stacked items — Mobile",
+      "default": 32,
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "text_gap_desktop",
+      "label": "Gap inside text column — Desktop",
+      "default": 24,
+      "min": 0,
+      "max": 80,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "text_gap_mobile",
+      "label": "Gap inside text column — Mobile",
+      "default": 18,
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "select",
+      "id": "mobile_text_order",
+      "label": "Mobile — text order",
+      "default": "1",
+      "options": [
+        { "value": "1", "label": "First" },
+        { "value": "2", "label": "Second" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "mobile_media_order",
+      "label": "Mobile — image order",
+      "default": "2",
+      "options": [
+        { "value": "1", "label": "First" },
+        { "value": "2", "label": "Second" }
+      ]
+    },
+
+    { "type": "header", "content": "Section padding + margin" },
+    {
+      "type": "range",
+      "id": "padding_top_desktop",
+      "label": "Padding top — Desktop",
+      "default": 80,
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_desktop",
+      "label": "Padding bottom — Desktop",
+      "default": 80,
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "label": "Padding top — Mobile",
+      "default": 40,
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom — Mobile",
+      "default": 40,
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "margin_top_desktop",
+      "label": "Margin top — Desktop",
+      "default": 0,
+      "min": -100,
+      "max": 200,
+      "step": 4,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_desktop",
+      "label": "Margin bottom — Desktop",
+      "default": 0,
+      "min": -100,
+      "max": 200,
+      "step": 4,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "margin_top_mobile",
+      "label": "Margin top — Mobile",
+      "default": 0,
+      "min": -100,
+      "max": 200,
+      "step": 4,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_mobile",
+      "label": "Margin bottom — Mobile",
+      "default": 0,
+      "min": -100,
+      "max": 200,
+      "step": 4,
+      "unit": "px"
+    },
+    {
+      "type": "checkbox",
+      "id": "reset_spacing",
+      "label": "Remove section spacing",
+      "default": false
+    }
+  ],
+  "blocks": [
+    {
+      "type": "point",
+      "name": "Icon point",
+      "limit": 6,
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "icon",
+          "label": "Icon",
+          "info": "Recommended: small SVG/PNG, square, transparent background."
+        },
+        {
+          "type": "textarea",
+          "id": "text",
+          "label": "Text",
+          "default": "Clean, conscious, functional formulas"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Our Story 3",
+      "blocks": [
+        { "type": "point", "settings": { "text": "Clean, conscious, functional formulas" } },
+        { "type": "point", "settings": { "text": "Modern, elevated, and gender-neutral fresh scents" } },
+        { "type": "point", "settings": { "text": "Refillable designs that are also good for the planet." } }
+      ]
+    }
+  ]
+}
+{% endschema %}

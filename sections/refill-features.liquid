@@ -1,0 +1,459 @@
+{%- assign sid = 'rf-' | append: section.id -%}
+
+<style>
+  #{{ sid }} {
+    background: {{ section.settings.background_color }};
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+    padding-left: {{ section.settings.side_margin_desktop | default: 0 }}px;
+    padding-right: {{ section.settings.side_margin_desktop | default: 0 }}px;
+  }
+  @media (max-width: 640px) {
+    #{{ sid }} {
+      padding-left: {{ section.settings.side_margin_mobile | default: 0 }}px;
+      padding-right: {{ section.settings.side_margin_mobile | default: 0 }}px;
+    }
+  }
+
+  #{{ sid }} .rf-inner {
+    max-width: {{ section.settings.max_width }}px;
+    margin: 0 auto;
+    padding-left: {{ section.settings.padding_horizontal }}px;
+    padding-right: {{ section.settings.padding_horizontal }}px;
+  }
+
+  #{{ sid }} .rf-heading {
+    font-family: 'Inter', sans-serif;
+    font-weight: {{ section.settings.heading_weight }};
+    font-size: {{ section.settings.heading_size }}px;
+    line-height: 1.1;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    text-align: center;
+    color: {{ section.settings.heading_color }};
+    margin: 0 0 {{ section.settings.heading_gap }}px;
+  }
+
+  #{{ sid }} .rf-layout {
+    display: grid;
+    grid-template-columns: 1fr {{ section.settings.image_width }}px 1fr;
+    gap: {{ section.settings.column_gap }}px;
+    align-items: center;
+  }
+
+  #{{ sid }} .rf-col {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: {{ section.settings.point_gap }}px;
+  }
+
+  #{{ sid }} .rf-col--left { text-align: right; }
+  #{{ sid }} .rf-col--right { text-align: left; }
+
+  #{{ sid }} .rf-point-heading {
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 18px;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    color: {{ section.settings.point_heading_color }};
+    margin: 0 0 6px;
+    padding: 0;
+  }
+
+  #{{ sid }} .rf-point-desc {
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 22px;
+    color: {{ section.settings.point_desc_color }};
+    margin: 0;
+    padding: 0;
+  }
+
+  #{{ sid }} .rf-image-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  #{{ sid }} .rf-image-wrap img {
+    width: {{ section.settings.image_width }}px;
+    height: {{ section.settings.image_height }}px;
+    object-fit: cover;
+    border-radius: {{ section.settings.image_radius }}px;
+    display: block;
+  }
+
+  #{{ sid }} .rf-image-placeholder {
+    width: {{ section.settings.image_width }}px;
+    height: {{ section.settings.image_height }}px;
+    border-radius: {{ section.settings.image_radius }}px;
+    background: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #{{ sid }} .rf-image-placeholder svg {
+    width: 60%;
+    height: 60%;
+    opacity: 0.3;
+  }
+
+  @media (max-width: 900px) {
+    #{{ sid }} .rf-layout {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+    #{{ sid }} .rf-col--left { text-align: left; order: 2; }
+    #{{ sid }} .rf-image-wrap { order: 1; }
+    #{{ sid }} .rf-col--right { order: 3; }
+    #{{ sid }} .rf-image-wrap img,
+    #{{ sid }} .rf-image-placeholder {
+      width: 100%;
+      max-width: {{ section.settings.image_width }}px;
+      height: auto;
+      aspect-ratio: {{ section.settings.image_width }} / {{ section.settings.image_height }};
+    }
+  }
+  @media (max-width: 640px) {
+    #{{ sid }} {
+      padding-top: 48px;
+      padding-bottom: 48px;
+    }
+    #{{ sid }} .rf-inner { padding-left: 16px; padding-right: 16px; }
+    #{{ sid }} .rf-heading { font-size: 22px; line-height: 26px; margin-bottom: 28px; }
+    #{{ sid }} .rf-point-heading { font-size: 14px; line-height: 16px; }
+    #{{ sid }} .rf-point-desc { font-size: 15px; line-height: 20px; }
+    #{{ sid }} .rf-layout { gap: 24px; }
+  }
+</style>
+
+<section id="{{ sid }}">
+  <div class="rf-inner">
+    <h2 class="rf-heading">{{ section.settings.heading }}</h2>
+
+    <div class="rf-layout">
+
+      {%- comment %} Left column — blocks with side = left {%- endcomment %}
+      <div class="rf-col rf-col--left">
+        {%- assign has_left = false -%}
+        {%- for block in section.blocks -%}
+          {%- if block.settings.side == 'left' -%}
+            {%- assign has_left = true -%}
+            <div class="rf-point" {{ block.shopify_attributes }}>
+              <p class="rf-point-heading">{{ block.settings.point_heading }}</p>
+              <p class="rf-point-desc">{{ block.settings.point_description }}</p>
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+        {%- unless has_left -%}
+          <div class="rf-point">
+            <p class="rf-point-heading">Depth</p>
+            <p class="rf-point-desc">Fresh, woody &amp; long-lasting (aka 'The Heavyweight')</p>
+          </div>
+          <div class="rf-point">
+            <p class="rf-point-heading">Longevity</p>
+            <p class="rf-point-desc">Lasts all day without reapplication</p>
+          </div>
+        {%- endunless -%}
+      </div>
+
+      {%- comment %} Center image {%- endcomment %}
+      <div class="rf-image-wrap">
+        {%- if section.settings.image != blank -%}
+          {{
+            section.settings.image
+            | image_url: width: section.settings.image_width
+            | image_tag:
+              loading: 'lazy',
+              width: section.settings.image_width,
+              height: section.settings.image_height,
+              alt: section.settings.heading
+          }}
+        {%- else -%}
+          <div class="rf-image-placeholder">
+            {{ 'product-1' | placeholder_svg_tag }}
+          </div>
+        {%- endif -%}
+      </div>
+
+      {%- comment %} Right column — blocks with side = right {%- endcomment %}
+      <div class="rf-col rf-col--right">
+        {%- assign has_right = false -%}
+        {%- for block in section.blocks -%}
+          {%- if block.settings.side == 'right' -%}
+            {%- assign has_right = true -%}
+            <div class="rf-point" {{ block.shopify_attributes }}>
+              <p class="rf-point-heading">{{ block.settings.point_heading }}</p>
+              <p class="rf-point-desc">{{ block.settings.point_description }}</p>
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+        {%- unless has_right -%}
+          <div class="rf-point">
+            <p class="rf-point-heading">Versatility</p>
+            <p class="rf-point-desc">Works on hair, body &amp; fabric — one bottle, everything</p>
+          </div>
+          <div class="rf-point">
+            <p class="rf-point-heading">Purity</p>
+            <p class="rf-point-desc">Clean ingredients, no harsh chemicals</p>
+          </div>
+        {%- endunless -%}
+      </div>
+
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Refill Features",
+  "tag": "section",
+  "class": "refill-features-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Multipurpose Refills"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "label": "Heading font size (px)",
+      "min": 24,
+      "max": 100,
+      "step": 2,
+      "default": 56
+    },
+    {
+      "type": "select",
+      "id": "heading_weight",
+      "label": "Heading font weight",
+      "options": [
+        { "value": "300", "label": "Light 300" },
+        { "value": "400", "label": "Regular 400" },
+        { "value": "500", "label": "Medium 500" },
+        { "value": "600", "label": "SemiBold 600" }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "range",
+      "id": "heading_gap",
+      "label": "Gap below heading (px)",
+      "min": 20,
+      "max": 120,
+      "step": 4,
+      "default": 60
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#1a1a1a"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Product image"
+    },
+    {
+      "type": "range",
+      "id": "image_width",
+      "label": "Image width (px)",
+      "min": 200,
+      "max": 600,
+      "step": 2,
+      "default": 434
+    },
+    {
+      "type": "range",
+      "id": "image_height",
+      "label": "Image height (px)",
+      "min": 300,
+      "max": 900,
+      "step": 2,
+      "default": 651
+    },
+    {
+      "type": "range",
+      "id": "image_radius",
+      "label": "Image border radius (px)",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "column_gap",
+      "label": "Gap between columns (px)",
+      "min": 20,
+      "max": 120,
+      "step": 4,
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "point_gap",
+      "label": "Gap between feature points (px)",
+      "min": 20,
+      "max": 120,
+      "step": 4,
+      "default": 60
+    },
+    {
+      "type": "color",
+      "id": "point_heading_color",
+      "label": "Point heading color",
+      "default": "#1a1a1a"
+    },
+    {
+      "type": "color",
+      "id": "point_desc_color",
+      "label": "Point description color",
+      "default": "#444444"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "label": "Section max width (px)",
+      "min": 800,
+      "max": 1600,
+      "step": 20,
+      "default": 1200
+    },
+    {
+      "type": "range",
+      "id": "padding_horizontal",
+      "label": "Side padding (px)",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top (px)",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom (px)",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "default": 80
+    },
+    {
+      "type": "header",
+      "content": "Side margins"
+    },
+    {
+      "type": "range",
+      "id": "side_margin_desktop",
+      "label": "Side margin – Desktop (px)",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "default": 0,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "side_margin_mobile",
+      "label": "Side margin – Mobile (px)",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "default": 0,
+      "unit": "px"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "feature_point",
+      "name": "Feature Point",
+      "settings": [
+        {
+          "type": "select",
+          "id": "side",
+          "label": "Side",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "right", "label": "Right" }
+          ],
+          "default": "left"
+        },
+        {
+          "type": "text",
+          "id": "point_heading",
+          "label": "Point heading",
+          "default": "Feature"
+        },
+        {
+          "type": "textarea",
+          "id": "point_description",
+          "label": "Point description",
+          "default": "Describe this feature of the product."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Refill Features",
+      "blocks": [
+        {
+          "type": "feature_point",
+          "settings": {
+            "side": "left",
+            "point_heading": "Depth",
+            "point_description": "Fresh, woody & long-lasting (aka 'The Heavyweight')"
+          }
+        },
+        {
+          "type": "feature_point",
+          "settings": {
+            "side": "left",
+            "point_heading": "Longevity",
+            "point_description": "Lasts all day without reapplication"
+          }
+        },
+        {
+          "type": "feature_point",
+          "settings": {
+            "side": "right",
+            "point_heading": "Versatility",
+            "point_description": "Works on hair, body & fabric — one bottle, everything"
+          }
+        },
+        {
+          "type": "feature_point",
+          "settings": {
+            "side": "right",
+            "point_heading": "Purity",
+            "point_description": "Clean ingredients, no harsh chemicals"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

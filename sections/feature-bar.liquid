@@ -1,0 +1,324 @@
+{%- liquid
+  assign sec_st = section.settings
+  assign default_icon = sec_st.icon
+  assign mt_mobile = sec_st.margin_top_mobile
+  if mt_mobile == 0
+    assign mt_mobile = sec_st.margin_top_desktop
+  endif
+  assign mb_mobile = sec_st.margin_bottom_mobile
+  if mb_mobile == 0
+    assign mb_mobile = sec_st.margin_bottom_desktop
+  endif
+-%}
+{% style %}
+  #shopify-section-{{ section.id }} {
+    margin-top: {{ sec_st.margin_top_desktop | default: 0 }}px !important;
+    margin-bottom: {{ sec_st.margin_bottom_desktop | default: 0 }}px !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding: 0 !important;
+    display: block;
+    width: 100%;
+  }
+  @media (max-width: 767.98px) {
+    #shopify-section-{{ section.id }} {
+      margin-top: {{ mt_mobile | default: 0 }}px !important;
+      margin-bottom: {{ mb_mobile | default: 0 }}px !important;
+    }
+  }
+{% endstyle %}
+<style>
+  #fb-marquee-{{ section.id }} {
+    width: 100%;
+    overflow: hidden;
+    background-color: {{ sec_st.bg_color | default: '#ffffff' }};
+    padding-top: {{ sec_st.padding_top_desktop | default: 18 }}px;
+    padding-bottom: {{ sec_st.padding_bottom_desktop | default: 18 }}px;
+  }
+  #fb-marquee-{{ section.id }} .fb__track {
+    display: flex;
+    width: max-content;
+    align-items: center;
+    animation: fb-scroll-{{ section.id }} {{ sec_st.speed | default: 40 }}s linear infinite;
+  }
+  #fb-marquee-{{ section.id }} .fb__item {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    gap: {{ sec_st.gap | default: 48 }}px;
+    padding-right: {{ sec_st.gap | default: 48 }}px;
+  }
+  #fb-marquee-{{ section.id }} .fb__text {
+    white-space: nowrap;
+    color: {{ sec_st.text_color | default: '#111111' }};
+    font-size: {{ sec_st.font_size | default: 18 }}px;
+    line-height: 1;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    font-style: italic;
+  }
+  #fb-marquee-{{ section.id }} .fb__icon {
+    height: {{ sec_st.icon_size | default: 24 }}px;
+    width: auto;
+    flex-shrink: 0;
+    display: block;
+  }
+  @keyframes fb-scroll-{{ section.id }} {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  @media (max-width: 767.98px) {
+    #fb-marquee-{{ section.id }} {
+      padding-top: {{ sec_st.padding_top_mobile | default: 12 }}px;
+      padding-bottom: {{ sec_st.padding_bottom_mobile | default: 12 }}px;
+    }
+    #fb-marquee-{{ section.id }} .fb__item {
+      gap: {{ sec_st.gap_mobile | default: 24 }}px;
+      padding-right: {{ sec_st.gap_mobile | default: 24 }}px;
+    }
+    #fb-marquee-{{ section.id }} .fb__text {
+      font-size: {{ sec_st.font_size_mobile | default: 13 }}px;
+    }
+    #fb-marquee-{{ section.id }} .fb__icon {
+      height: {{ sec_st.icon_size_mobile | default: 16 }}px;
+    }
+  }
+</style>
+
+<div id="fb-marquee-{{ section.id }}">
+  <div class="fb__track">
+    {%- for pass in (1..6) -%}
+      {%- for block in section.blocks -%}
+        {%- assign block_icon = block.settings.icon | default: default_icon -%}
+        <div class="fb__item"{% if pass > 1 %} aria-hidden="true"{% endif %}{% if pass == 1 %} {{ block.shopify_attributes }}{% endif %}>
+          <span class="fb__text">{{ block.settings.text | escape }}</span>
+          {%- if block_icon != blank -%}
+            {{ block_icon | image_url: width: 200 | image_tag: class: 'fb__icon', alt: '' }}
+          {%- endif -%}
+        </div>
+      {%- endfor -%}
+    {%- endfor -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Feature Bar",
+  "tag": "section",
+  "disabled_on": {
+    "groups": ["header", "footer", "custom.overlay"]
+  },
+  "settings": [
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#111111"
+    },
+    {
+      "type": "image_picker",
+      "id": "icon",
+      "label": "Default separator icon",
+      "info": "Shown after every text block. Each block can override it."
+    },
+    {
+      "type": "range",
+      "id": "icon_size",
+      "label": "Icon size (desktop)",
+      "min": 12,
+      "max": 80,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "icon_size_mobile",
+      "label": "Icon size (mobile)",
+      "min": 8,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "font_size",
+      "label": "Font size (desktop)",
+      "min": 12,
+      "max": 60,
+      "step": 1,
+      "unit": "px",
+      "default": 18
+    },
+    {
+      "type": "range",
+      "id": "font_size_mobile",
+      "label": "Font size (mobile)",
+      "min": 10,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "default": 13
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "label": "Spacing between text & icon (desktop)",
+      "min": 8,
+      "max": 160,
+      "step": 2,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "gap_mobile",
+      "label": "Spacing between text & icon (mobile)",
+      "min": 4,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "speed",
+      "label": "Scroll speed (seconds)",
+      "min": 10,
+      "max": 120,
+      "step": 5,
+      "default": 40,
+      "info": "Lower = faster. Higher = slower."
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_desktop",
+      "label": "Padding top (desktop)",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "default": 18
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_desktop",
+      "label": "Padding bottom (desktop)",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "default": 18
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "label": "Padding top (mobile)",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom (mobile)",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "Margins"
+    },
+    {
+      "type": "range",
+      "id": "margin_top_desktop",
+      "label": "Margin top (desktop)",
+      "min": -200,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_desktop",
+      "label": "Margin bottom (desktop)",
+      "min": -200,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "margin_top_mobile",
+      "label": "Margin top (mobile)",
+      "info": "Falls back to the desktop value when 0.",
+      "min": -200,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_mobile",
+      "label": "Margin bottom (mobile)",
+      "info": "Falls back to the desktop value when 0.",
+      "min": -200,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "blocks": [
+    {
+      "type": "item",
+      "name": "Text block",
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "Built for humidity"
+        },
+        {
+          "type": "image_picker",
+          "id": "icon",
+          "label": "Icon (optional override)",
+          "info": "Falls back to the default separator icon when empty."
+        }
+      ]
+    }
+  ],
+  "max_blocks": 20,
+  "presets": [
+    {
+      "name": "Feature Bar",
+      "blocks": [
+        { "type": "item", "settings": { "text": "Built for humidity" } },
+        { "type": "item", "settings": { "text": "Refillable by design" } },
+        { "type": "item", "settings": { "text": "Skin-safe formulas" } },
+        { "type": "item", "settings": { "text": "Long-lasting wear" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,250 @@
+{%- liquid
+  assign s = section.settings
+-%}
+
+<div class="ssm" style="background-color: {{ s.bg_color }};">
+  <div class="ssm__inner">
+    <div class="ssm__image-wrap">
+      {%- if s.image != blank -%}
+        {{
+          s.image
+          | image_url: width: 1200
+          | image_tag:
+            loading: 'lazy',
+            alt: s.image.alt | default: s.heading,
+            class: 'ssm__img',
+            widths: '400, 600, 900, 1200',
+            sizes: '100vw'
+        }}
+      {%- else -%}
+        {{ 'image' | placeholder_svg_tag: 'ssm__img ssm__img--placeholder' }}
+      {%- endif -%}
+      {%- if s.heading != blank -%}
+        <h2 class="ssm__heading" style="color: {{ s.heading_color }};">{{ s.heading | escape }}</h2>
+      {%- endif -%}
+    </div>
+    {%- if s.description != blank -%}
+      <p class="ssm__desc" style="color: {{ s.desc_color }};">{{ s.description }}</p>
+    {%- endif -%}
+  </div>
+</div>
+
+{% style %}
+  #shopify-section-{{ section.id }} .ssm {
+    display: none;
+  }
+  @media screen and (max-width: 640px) {
+    #shopify-section-{{ section.id }} .ssm {
+      display: block;
+    }
+  }
+
+  #shopify-section-{{ section.id }} .ssm__inner {
+    padding: 0 12px;
+  }
+  #shopify-section-{{ section.id }} .ssm__image-wrap {
+    position: relative;
+    border-radius: 14px;
+    overflow: hidden;
+    clip-path: inset(0 round 14px);
+    font-size: 0;
+    line-height: 0;
+  }
+  #shopify-section-{{ section.id }} .ssm__img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 14px;
+    vertical-align: top;
+  }
+  #shopify-section-{{ section.id }} .ssm__img--placeholder {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    background: #444;
+  }
+  #shopify-section-{{ section.id }} .ssm__heading {
+    position: absolute;
+    top: 24px;
+    left: 24px;
+    right: 24px;
+    z-index: 5;
+    margin: 0;
+    font-family: 'Inter', 'Avenir Next', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 16px;
+    letter-spacing: 0;
+    text-transform: uppercase;
+    text-align: left;
+  }
+  #shopify-section-{{ section.id }} .ssm__desc {
+    margin: 16px 0 0;
+    font-family: 'Inter', 'Avenir Next', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 18px;
+    letter-spacing: 0;
+  }
+
+  {%- comment -%} Custom margin / padding controls (4-value comma format) {%- endcomment -%}
+  {%- assign m = s.margin_desktop | split: ',' -%}
+  {%- assign p = s.padding_desktop | split: ',' -%}
+  #shopify-section-{{ section.id }} .ssm {
+    {%- if m[0] != blank %}margin-top: {{ m[0] }};{% endif -%}
+    {%- if m[1] != blank %}margin-right: {{ m[1] }};{% endif -%}
+    {%- if m[2] != blank %}margin-bottom: {{ m[2] }};{% endif -%}
+    {%- if m[3] != blank %}margin-left: {{ m[3] }};{% endif -%}
+    {%- if p[0] != blank %}padding-top: {{ p[0] }};{% endif -%}
+    {%- if p[1] != blank %}padding-right: {{ p[1] }};{% endif -%}
+    {%- if p[2] != blank %}padding-bottom: {{ p[2] }};{% endif -%}
+    {%- if p[3] != blank %}padding-left: {{ p[3] }};{% endif -%}
+  }
+  @media screen and (min-width: 641px) and (max-width: 960px) {
+    {%- assign m = s.margin_tablet | split: ',' -%}
+    {%- assign p = s.padding_tablet | split: ',' -%}
+    #shopify-section-{{ section.id }} .ssm {
+      {%- if m[0] != blank %}margin-top: {{ m[0] }};{% endif -%}
+      {%- if m[1] != blank %}margin-right: {{ m[1] }};{% endif -%}
+      {%- if m[2] != blank %}margin-bottom: {{ m[2] }};{% endif -%}
+      {%- if m[3] != blank %}margin-left: {{ m[3] }};{% endif -%}
+      {%- if p[0] != blank %}padding-top: {{ p[0] }};{% endif -%}
+      {%- if p[1] != blank %}padding-right: {{ p[1] }};{% endif -%}
+      {%- if p[2] != blank %}padding-bottom: {{ p[2] }};{% endif -%}
+      {%- if p[3] != blank %}padding-left: {{ p[3] }};{% endif -%}
+    }
+  }
+  @media screen and (max-width: 640px) {
+    {%- assign m = s.margin_mobile | split: ',' -%}
+    {%- assign p = s.padding_mobile | split: ',' -%}
+    #shopify-section-{{ section.id }} .ssm {
+      {%- if m[0] != blank %}margin-top: {{ m[0] }};{% endif -%}
+      {%- if m[1] != blank %}margin-right: {{ m[1] }};{% endif -%}
+      {%- if m[2] != blank %}margin-bottom: {{ m[2] }};{% endif -%}
+      {%- if m[3] != blank %}margin-left: {{ m[3] }};{% endif -%}
+      {%- if p[0] != blank %}padding-top: {{ p[0] }};{% endif -%}
+      {%- if p[1] != blank %}padding-right: {{ p[1] }};{% endif -%}
+      {%- if p[2] != blank %}padding-bottom: {{ p[2] }};{% endif -%}
+      {%- if p[3] != blank %}padding-left: {{ p[3] }};{% endif -%}
+    }
+  }
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "Story Spotlight Mobile",
+  "tag": "section",
+  "disabled_on": {
+    "groups": ["header", "footer", "custom.overlay"]
+  },
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "This section is only visible on mobile (≤640px). Use it alongside Story Spotlight 2 (which renders on desktop)."
+    },
+    {
+      "type": "header",
+      "content": "Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading text",
+      "default": "A FUNCTIONAL PERSONAL CARE BRAND THAT PRIORITISES BODY CARE FOR PEOPLE WHO ACTUALLY MOVE THROUGH THEIR DAY."
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "Description"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "Your skin doesn't stop working just because your deodorant did. It sweats. It reacts. It absorbs whatever you put on it, good or bad. Summr was built around functional fragrances that interact with the skin instead of sitting on top of it. Formulas made with ingredients that belong in skincare, not just body care. A refill system that eliminates the waste without eliminating the ritual."
+    },
+    {
+      "type": "color",
+      "id": "desc_color",
+      "label": "Description color",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Background"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Section background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "Design Desktop Options"
+    },
+    {
+      "type": "text",
+      "id": "margin_desktop",
+      "label": "Margin",
+      "info": "Margin top, margin right, margin bottom, margin left. Leave blank to skip a side. Example: ,,85px,"
+    },
+    {
+      "type": "text",
+      "id": "padding_desktop",
+      "label": "Padding",
+      "info": "Padding top, padding right, padding bottom, padding left. Leave blank to skip a side."
+    },
+    {
+      "type": "header",
+      "content": "Design Tablet Options"
+    },
+    {
+      "type": "text",
+      "id": "margin_tablet",
+      "label": "Margin",
+      "info": "Margin top, margin right, margin bottom, margin left. Leave blank to skip a side."
+    },
+    {
+      "type": "text",
+      "id": "padding_tablet",
+      "label": "Padding",
+      "info": "Padding top, padding right, padding bottom, padding left. Leave blank to skip a side."
+    },
+    {
+      "type": "header",
+      "content": "Design Mobile Options"
+    },
+    {
+      "type": "text",
+      "id": "margin_mobile",
+      "label": "Margin",
+      "info": "Margin top, margin right, margin bottom, margin left. Leave blank to skip a side. Example: ,,25px,"
+    },
+    {
+      "type": "text",
+      "id": "padding_mobile",
+      "label": "Padding",
+      "info": "Padding top, padding right, padding bottom, padding left. Leave blank to skip a side."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Story Spotlight Mobile"
+    }
+  ]
+}
+{% endschema %}

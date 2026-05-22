@@ -1,0 +1,1652 @@
+{%- liquid
+  assign s = section.settings
+  assign first_variant = product.selected_or_first_available_variant
+-%}
+
+<div
+  id="spf-{{ section.id }}"
+  class="spf"
+  data-current-step="1"
+  style="
+    --spf-bg: {{ s.left_bg_color | default: '#FFF8B8' }};
+    --spf-float-amplitude: {{ s.float_amplitude | default: 14 }}px;
+    --spf-float-duration: {{ s.float_duration | default: 35 | divided_by: 10.0 }}s;
+  "
+>
+  <form id="spf-form-{{ section.id }}" action="/cart/add" method="post" enctype="multipart/form-data">
+    <input type="hidden" name="id" id="spf-variant-id" value="{{ first_variant.id }}">
+    <input type="hidden" name="quantity" value="1">
+    <input type="hidden" name="properties[Scent]" id="spf-prop-scent" value="">
+    <input type="hidden" name="properties[Case]" id="spf-prop-case" value="{{ first_variant.title | escape }}">
+    <input type="hidden" name="return_to" value="/checkout">
+
+    <div class="spf__main">
+      <!-- LEFT: yellow background + floating variant image + shadow -->
+      <div class="spf__media">
+        {%- for variant in product.variants -%}
+          {%- if variant.featured_image != blank -%}
+            <img
+              class="spf__image{% if variant.id == first_variant.id %} is-active{% endif %}"
+              data-variant-id="{{ variant.id }}"
+              src="{{ variant.featured_image | image_url: width: 1200 }}"
+              alt="{{ variant.title | escape }}"
+              loading="lazy"
+            >
+          {%- endif -%}
+        {%- endfor -%}
+        {%- if s.step3_image != blank -%}
+          <img
+            class="spf__image spf__image--step"
+            data-for-step="2"
+            src="{{ s.step3_image | image_url: width: 1200 }}"
+            alt="{{ s.step3_heading | default: 'Choose your scent' | escape }}"
+            loading="lazy"
+          >
+        {%- endif -%}
+        {%- comment -%}
+          Per-variant review-step images. For each product variant we
+          check two settings (in order):
+          1. `review_image_variant_N_url` — a plain URL string. Used
+             as-is, so any pre-uploaded Shopify Files / external CDN
+             link works without going through Shopify's image_picker.
+          2. `review_image_variant_N` — the image_picker fallback.
+          Renders the image tagged with BOTH data-for-step="3" and
+          data-variant-id so the JS only shows it at the Review step
+          for the matching variant.
+        {%- endcomment -%}
+        {%- for variant in product.variants -%}
+          {%- assign idx = forloop.index -%}
+          {%- assign review_url_key = 'review_image_variant_' | append: idx | append: '_url' -%}
+          {%- assign review_url = section.settings[review_url_key] -%}
+          {%- assign review_picker_key = 'review_image_variant_' | append: idx -%}
+          {%- assign review_picker = section.settings[review_picker_key] -%}
+          {%- if review_url != blank -%}
+            <img
+              class="spf__image spf__image--step"
+              data-for-step="3"
+              data-variant-id="{{ variant.id }}"
+              src="{{ review_url }}"
+              alt="{{ variant.title | escape }}"
+              loading="lazy"
+            >
+          {%- elsif review_picker != blank -%}
+            <img
+              class="spf__image spf__image--step"
+              data-for-step="3"
+              data-variant-id="{{ variant.id }}"
+              src="{{ review_picker | image_url: width: 1200 }}"
+              alt="{{ variant.title | escape }}"
+              loading="lazy"
+            >
+          {%- endif -%}
+        {%- endfor -%}
+        <div class="spf__shadow" aria-hidden="true"></div>
+      </div>
+
+      <!-- RIGHT: step panels -->
+      <div class="spf__panel">
+
+        <!-- STEP 1 — Choose Case -->
+        <div class="spf__step" data-step="1">
+          <h2 class="spf__step-heading spf__step-heading--script">{{ s.step1_heading | default: 'Choose your case' }}</h2>
+          {%- if s.step1_features != blank -%}
+            <div class="spf__features">
+              {%- assign features = s.step1_features | split: '|' -%}
+              {%- for f in features -%}
+                <span class="spf__feature">
+                  <span class="spf__feature-tick" aria-hidden="true">✓</span>
+                  {{ f | strip }}
+                </span>
+              {%- endfor -%}
+            </div>
+          {%- endif -%}
+
+          <div class="spf__variants" role="radiogroup" aria-label="Case options">
+            {%- for variant in product.variants -%}
+              {%- assign idx = forloop.index -%}
+              {%- assign swatch_color_key = 'case_swatch_color_' | append: idx -%}
+              {%- assign swatch_color = section.settings[swatch_color_key] | default: '#cccccc' -%}
+              <button
+                type="button"
+                class="spf__variant{% if variant.id == first_variant.id %} is-selected{% endif %}"
+                role="radio"
+                aria-checked="{% if variant.id == first_variant.id %}true{% else %}false{% endif %}"
+                data-variant-id="{{ variant.id }}"
+                data-variant-title="{{ variant.title | escape }}"
+                data-variant-image="{% if variant.featured_image != blank %}{{ variant.featured_image | image_url: width: 1200 }}{% endif %}"
+              >
+                <span class="spf__swatch" style="background-color: {{ swatch_color }};" aria-hidden="true"></span>
+                <span class="spf__variant-name">{{ variant.title }}</span>
+              </button>
+            {%- endfor -%}
+          </div>
+
+          {%- if s.step1_link_label != blank -%}
+            {%- assign step1_link_href = s.step1_link_url | default: 'https://tic-beauty.myshopify.com/collections/refill' -%}
+            {%- if step1_link_href == blank -%}{%- assign step1_link_href = 'https://tic-beauty.myshopify.com/collections/refill' -%}{%- endif -%}
+            <a class="spf__link" href="{{ step1_link_href }}">{{ s.step1_link_label }}</a>
+          {%- endif -%}
+        </div>
+
+        <!-- STEP 2 — Choose Scent -->
+        <div class="spf__step" data-step="2" hidden>
+          <h2 class="spf__step-heading spf__step-heading--script">{{ s.step3_heading | default: 'Choose your scent' }}</h2>
+          {%- if s.step3_subtext != blank -%}
+            <p class="spf__step-sub">{{ s.step3_subtext }}</p>
+          {%- endif -%}
+
+          <p class="spf__scent-counter" aria-live="polite">
+            Scent <span class="spf__counter-current">0</span> / <span class="spf__counter-total">1</span> selected.
+            <span class="spf__counter-msg">Select 1 more before proceeding.</span>
+          </p>
+
+          <div class="spf__scents" role="radiogroup" aria-label="Scent options">
+            {%- for block in section.blocks -%}
+              {%- if block.type == 'scent' -%}
+                {%- assign sc = block.settings -%}
+                <button
+                  type="button"
+                  class="spf__scent"
+                  role="radio"
+                  aria-checked="false"
+                  data-scent-name="{{ sc.name | escape }}"
+                  data-scent-selected-image="{% if sc.selected_image != blank %}{{ sc.selected_image | image_url: width: 200 }}{% endif %}"
+                  {{ block.shopify_attributes }}
+                >
+                  <span class="spf__scent-frame">
+                    <span class="spf__scent-media">
+                      {%- if sc.image != blank -%}
+                        <img src="{{ sc.image | image_url: width: 600 }}" alt="{{ sc.name | escape }}" loading="lazy">
+                      {%- endif -%}
+                    </span>
+                    <span class="spf__scent-add" aria-hidden="true">
+                      <span class="spf__scent-add-plus">+</span>ADD
+                    </span>
+                    <span class="spf__scent-qty" aria-hidden="true">
+                      <span class="spf__scent-qty-btn spf__scent-qty-minus" data-scent-qty="dec">−</span>
+                      <span class="spf__scent-qty-value">1</span>
+                      <span class="spf__scent-qty-btn spf__scent-qty-plus" data-scent-qty="inc" aria-disabled="true">+</span>
+                    </span>
+                  </span>
+                  {%- if sc.name != blank -%}
+                    <span class="spf__scent-name">{{ sc.name }}</span>
+                  {%- endif -%}
+                  {%- if sc.notes != blank -%}
+                    <span class="spf__scent-notes">{{ sc.notes }}</span>
+                  {%- endif -%}
+                </button>
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
+        </div>
+
+        <!-- STEP 3 — Review & Checkout -->
+        <div class="spf__step" data-step="3" hidden>
+          <h2 class="spf__step-heading spf__step-heading--script">{{ s.step4_heading | default: 'Review your starter pack' }}</h2>
+          <div class="spf__review">
+            <div class="spf__review-row">
+              <span class="spf__review-label">Case</span>
+              <span class="spf__review-value" id="spf-summary-case"></span>
+            </div>
+            <div class="spf__review-row spf__review-row--scent">
+              <span class="spf__review-label">Scent</span>
+              <div class="spf__review-scent">
+                <img class="spf__review-scent-img" id="spf-summary-scent-img" src="" alt="" hidden>
+                <div class="spf__review-scent-text">
+                  <span class="spf__review-scent-name" id="spf-summary-scent"></span>
+                  <span class="spf__review-scent-notes" id="spf-summary-scent-notes"></span>
+                </div>
+              </div>
+            </div>
+            <div class="spf__review-row spf__review-row--total">
+              <span>Total</span>
+              <span>{{ first_variant.price | money }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM bar — back arrow + step indicator + selected chip + primary CTA -->
+    <div class="spf__bottom">
+      <button type="button" class="spf__back" id="spf-back-{{ section.id }}" aria-label="Previous step" disabled>
+        <span aria-hidden="true">←</span>
+      </button>
+      <ol class="spf__steps" aria-label="Progress">
+        <li class="spf__step-pill is-active" data-step-pill="1"><span class="spf__step-num">1</span><span class="spf__step-label">Case</span></li>
+        <li class="spf__step-pill" data-step-pill="2"><span class="spf__step-num">2</span><span class="spf__step-label">Scent</span></li>
+        <li class="spf__step-pill" data-step-pill="3"><span class="spf__step-num">3</span><span class="spf__step-label">Checkout</span></li>
+      </ol>
+      <div class="spf__cta-group">
+        <div class="spf__selected-chip" id="spf-selected-chip" hidden>
+          <img class="spf__selected-chip-img" id="spf-selected-chip-img" src="" alt="">
+          <button type="button" class="spf__selected-chip-x" id="spf-selected-chip-remove" aria-label="Remove scent">×</button>
+        </div>
+        <button type="button" class="spf__cta" id="spf-cta-{{ section.id }}">
+          <span id="spf-cta-label">{{ s.step1_cta | default: 'Choose case' }}</span>
+          <span class="spf__cta-arrow" aria-hidden="true">→</span>
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+
+{% style %}
+  /* Lock the page to this section only — no header / footer / overlays / page scroll.
+     Apply position: fixed to BOTH the section wrapper AND the inner .spf so the
+     overlay survives regardless of which wrapper the theme actually targets. */
+  html, body {
+    overflow: hidden !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    margin: 0 !important;
+  }
+  body > *:not(#MainContent):not(script):not(style):not(noscript) {
+    display: none !important;
+  }
+  #MainContent {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  #shopify-section-{{ section.id }},
+  .shopify-section:has(> #spf-{{ section.id }}) {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 9999 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  #spf-{{ section.id }} {
+    --spf-bottom-h: 76px;
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 9999 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    background: #fff;
+    color: #111;
+    overflow: hidden !important;
+  }
+  /* Pin both main and bottom bar to the viewport directly via position: fixed.
+     This bypasses any parent positioning context (transform / contain / filter
+     etc.) that might be interfering with the section wrapper. */
+  #spf-{{ section.id }} .spf__main {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: var(--spf-bottom-h) !important;
+    z-index: 10000 !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    overflow: hidden;
+  }
+  #spf-{{ section.id }} .spf__media {
+    position: relative;
+    background-color: var(--spf-bg);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+  }
+  #spf-{{ section.id }} .spf__image {
+    max-width: {{ s.media_image_size | default: 92 }}%;
+    max-height: {{ s.media_image_size | default: 92 }}%;
+    object-fit: contain;
+    display: none;
+    animation: spf-float-{{ section.id }} var(--spf-float-duration, 3.5s) ease-in-out infinite;
+    will-change: transform;
+    z-index: 2;
+    position: relative;
+  }
+  #spf-{{ section.id }} .spf__image.is-active {
+    display: block;
+  }
+  /* Case (1) + Review (3) — case image fills full vertical height of the left panel */
+  #spf-{{ section.id }}[data-current-step="1"] .spf__image.is-active[data-variant-id],
+  #spf-{{ section.id }}[data-current-step="3"] .spf__image.is-active[data-variant-id] {
+    max-width: 100%;
+    max-height: 100%;
+    height: 100%;
+    width: auto;
+  }
+  /* Scent step (2) — drop the yellow background and let the step image fill the left panel */
+  #spf-{{ section.id }}[data-current-step="2"] .spf__media {
+    background-color: #fff;
+  }
+  #spf-{{ section.id }}[data-current-step="2"] .spf__shadow {
+    display: none;
+  }
+  #spf-{{ section.id }}[data-current-step="2"] .spf__image--step.is-active {
+    max-width: 100%;
+    max-height: 100%;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    animation: none;
+  }
+  #spf-{{ section.id }} .spf__shadow {
+    position: absolute;
+    bottom: 12%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 36%;
+    height: 18px;
+    background: radial-gradient(ellipse, rgba(0,0,0,0.30) 0%, rgba(0,0,0,0) 70%);
+    filter: blur(8px);
+    animation: spf-shadow-{{ section.id }} var(--spf-float-duration, 3.5s) ease-in-out infinite;
+    pointer-events: none;
+    z-index: 1;
+  }
+  @keyframes spf-float-{{ section.id }} {
+    0%, 100% { transform: translateY(calc(var(--spf-float-amplitude, 14px) * 0.5)); }
+    50% { transform: translateY(calc(var(--spf-float-amplitude, 14px) * -0.5)); }
+  }
+  @keyframes spf-shadow-{{ section.id }} {
+    0%, 100% { transform: translateX(-50%) scale(0.92); opacity: 0.45; }
+    50% { transform: translateX(-50%) scale(1.05); opacity: 0.6; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #spf-{{ section.id }} .spf__image,
+    #spf-{{ section.id }} .spf__shadow {
+      animation: none !important;
+    }
+  }
+
+  /* Right panel + steps */
+  #spf-{{ section.id }} .spf__panel {
+    padding: 64px 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+    overflow-y: auto;
+  }
+  #spf-{{ section.id }} .spf__step[hidden] { display: none; }
+  #spf-{{ section.id }} .spf__step:not([hidden]) {
+    width: 100%;
+    max-width: {{ s.panel_max_width | default: 480 }}px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  #spf-{{ section.id }} .spf__step-heading {
+    font-family: 'Inter', sans-serif;
+    font-style: normal;
+    font-weight: 500;
+    font-size: 36px;
+    line-height: 40px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #111;
+    margin: 0 0 20px;
+    text-align: center;
+  }
+  /* Script/serif italic variant — used on the scent step */
+  #spf-{{ section.id }} .spf__step-heading--script {
+    font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 52px;
+    line-height: 1.1;
+    letter-spacing: 0;
+    text-transform: none;
+    margin: 0 0 12px;
+  }
+  #spf-{{ section.id }} .spf__step-sub {
+    text-align: center;
+    color: #666;
+    font-size: 14px;
+    margin: 0 0 24px;
+  }
+  #spf-{{ section.id }} .spf__scent-counter {
+    text-align: center;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    line-height: 1.4;
+    color: #444;
+    margin: 0 0 24px;
+  }
+  #spf-{{ section.id }} .spf__counter-current,
+  #spf-{{ section.id }} .spf__counter-total {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  #spf-{{ section.id }}.spf--scent-complete .spf__counter-current {
+    color: #2BB673;
+  }
+  #spf-{{ section.id }} .spf__features {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin: 0 0 32px;
+    color: #444;
+    font-size: 13px;
+    font-style: normal;
+    font-weight: 400;
+  }
+  #spf-{{ section.id }} .spf__feature {
+    font-style: normal;
+    font-weight: 400;
+  }
+  #spf-{{ section.id }} .spf__feature-tick {
+    color: #2BB673;
+    font-weight: 600;
+    margin-right: 4px;
+  }
+
+  /* Variant pills (case selector) — single column, one per row */
+  #spf-{{ section.id }} .spf__variants {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    max-width: 260px;
+    margin: 0 auto 24px;
+    width: 100%;
+  }
+  #spf-{{ section.id }} .spf__variant {
+    appearance: none;
+    background: #fff;
+    border: 1.5px solid #e5e5e5;
+    border-radius: 14px;
+    padding: 22px 20px;
+    min-height: 64px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+    text-align: left;
+    position: relative;
+    transition: border-color 180ms ease, box-shadow 180ms ease;
+  }
+  #spf-{{ section.id }} .spf__variant:hover { border-color: #999; }
+  #spf-{{ section.id }} .spf__variant.is-selected {
+    border-color: #111;
+    box-shadow: 0 0 0 1px #111 inset;
+  }
+  #spf-{{ section.id }} .spf__variant.is-selected::after {
+    content: '✓';
+    position: absolute;
+    top: -1px;
+    right: -1px;
+    width: 22px;
+    height: 22px;
+    background: #2BB673;
+    color: #fff;
+    font-size: 12px;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-top-right-radius: 12px;
+    border-bottom-left-radius: 12px;
+  }
+  #spf-{{ section.id }} .spf__swatch {
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid rgba(0,0,0,0.08);
+  }
+  #spf-{{ section.id }} .spf__variant-name {
+    font-size: 15px;
+    color: #111;
+  }
+  #spf-{{ section.id }} .spf__link {
+    display: block;
+    text-align: center;
+    font-size: 13px;
+    color: #000;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  #spf-{{ section.id }} .spf__link:hover,
+  #spf-{{ section.id }} .spf__link:visited,
+  #spf-{{ section.id }} .spf__link:active {
+    color: #000;
+  }
+
+  /* Plan cards */
+  #spf-{{ section.id }} .spf__plans {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 420px;
+    margin: 0 auto;
+  }
+  #spf-{{ section.id }} .spf__plan {
+    appearance: none;
+    background: #fff;
+    border: 1.5px solid #e5e5e5;
+    border-radius: 14px;
+    padding: 18px 20px;
+    text-align: left;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 4px 12px;
+    transition: border-color 180ms ease;
+  }
+  #spf-{{ section.id }} .spf__plan:hover { border-color: #999; }
+  #spf-{{ section.id }} .spf__plan.is-selected { border-color: #111; box-shadow: 0 0 0 1px #111 inset; }
+  #spf-{{ section.id }} .spf__plan-name {
+    grid-column: 1;
+    font-size: 16px;
+    font-weight: 500;
+  }
+  #spf-{{ section.id }} .spf__plan-price {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
+    font-weight: 500;
+  }
+  #spf-{{ section.id }} .spf__plan-desc {
+    grid-column: 1 / -1;
+    font-size: 13px;
+    color: #666;
+  }
+  #spf-{{ section.id }} .spf__plan-badge {
+    grid-column: 1 / -1;
+    display: inline-block;
+    width: max-content;
+    background: #111;
+    color: #fff;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 999px;
+    margin-bottom: 4px;
+  }
+
+  /* Scent grid */
+  #spf-{{ section.id }} .spf__scents {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: {{ s.scent_grid_gap | default: 18 }}px;
+    max-width: 420px;
+    margin: 0 auto;
+  }
+  #spf-{{ section.id }} .spf__scent {
+    appearance: none;
+    background: transparent;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+  #spf-{{ section.id }} .spf__scent-frame {
+    position: relative;
+    display: block;
+    border-radius: 16px;
+    transition: box-shadow 180ms ease;
+  }
+  #spf-{{ section.id }} .spf__scent-media {
+    aspect-ratio: 1;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #EDEEF2;
+  }
+  #spf-{{ section.id }} .spf__scent-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  #spf-{{ section.id }} .spf__scent-add {
+    position: absolute;
+    right: 6px;
+    bottom: 6px;
+    background: #111;
+    color: #fff;
+    border-radius: 999px;
+    padding: 5px 11px 5px 9px;
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  #spf-{{ section.id }} .spf__scent-add-plus {
+    font-size: 13px;
+    line-height: 1;
+    font-weight: 400;
+  }
+  /* Qty stepper — replaces the ADD pill once the tile is selected.
+     Capped at 1: minus deselects, plus is disabled. */
+  #spf-{{ section.id }} .spf__scent-qty {
+    position: absolute;
+    right: 6px;
+    bottom: 6px;
+    display: none;
+    align-items: center;
+    gap: 4px;
+    padding: 3px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.10);
+  }
+  #spf-{{ section.id }} .spf__scent.is-selected .spf__scent-add { display: none; }
+  #spf-{{ section.id }} .spf__scent.is-selected .spf__scent-qty { display: inline-flex; }
+  #spf-{{ section.id }} .spf__scent-qty-btn {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    line-height: 1;
+    user-select: none;
+  }
+  #spf-{{ section.id }} .spf__scent-qty-minus {
+    background: #111;
+    color: #fff;
+    cursor: pointer;
+  }
+  #spf-{{ section.id }} .spf__scent-qty-plus {
+    background: #d9d9d9;
+    color: #8a8a8a;
+    cursor: not-allowed;
+  }
+  #spf-{{ section.id }} .spf__scent-qty-value {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    color: #111;
+    min-width: 8px;
+    text-align: center;
+    line-height: 1;
+  }
+  #spf-{{ section.id }} .spf__scent-name {
+    display: block;
+    margin-top: 14px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    line-height: 1.2;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #111;
+  }
+  #spf-{{ section.id }} .spf__scent-notes {
+    display: block;
+    margin-top: 6px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    font-size: 10px;
+    line-height: 1.35;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: #444;
+  }
+
+  /* Review */
+  #spf-{{ section.id }} .spf__review {
+    max-width: 420px;
+    margin: 0 auto;
+    border: 1px solid #e5e5e5;
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  #spf-{{ section.id }} .spf__review-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 14px 18px;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 14px;
+  }
+  #spf-{{ section.id }} .spf__review-row:last-child { border-bottom: 0; }
+  #spf-{{ section.id }} .spf__review-row--total {
+    font-weight: 600;
+    background: #f9f9f9;
+    font-size: 16px;
+  }
+  #spf-{{ section.id }} .spf__review-row--scent {
+    align-items: center;
+    gap: 12px;
+  }
+  /* Image + text sit tightly together on the right side of the row, with
+     the "Scent" label on the left via the parent's justify-content:space-between. */
+  #spf-{{ section.id }} .spf__review-scent {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+  }
+  #spf-{{ section.id }} .spf__review-scent-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 1px solid #e5e5e5;
+    background: #f4f4f4;
+  }
+  #spf-{{ section.id }} .spf__review-scent-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    align-items: flex-end;
+    text-align: right;
+  }
+  #spf-{{ section.id }} .spf__review-scent-name {
+    font-weight: 500;
+    line-height: 1.2;
+  }
+  #spf-{{ section.id }} .spf__review-scent-notes {
+    font-size: 11px;
+    color: #666;
+    line-height: 1.3;
+    max-width: 180px;
+  }
+
+  /* Bottom bar — pinned to viewport bottom via position: fixed.
+     Height matches --spf-bottom-h so .spf__main above doesn't overlap. */
+  #spf-{{ section.id }} .spf__bottom {
+    position: fixed !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    height: var(--spf-bottom-h) !important;
+    z-index: 10001 !important;
+    background: #fff;
+    border-top: 1px solid #e5e5e5;
+    padding: 14px 24px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  #spf-{{ section.id }} .spf__back {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1.5px solid #e5e5e5;
+    background: #fff;
+    color: #111;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    line-height: 1;
+    flex-shrink: 0;
+    transition: border-color 180ms ease, background 180ms ease, opacity 180ms ease;
+  }
+  #spf-{{ section.id }} .spf__back:not([disabled]):hover { border-color: #999; }
+  #spf-{{ section.id }} .spf__back[disabled] { opacity: 0.35; cursor: not-allowed; }
+  #spf-{{ section.id }} .spf__cta-group {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-shrink: 0;
+  }
+  #spf-{{ section.id }} .spf__selected-chip {
+    position: relative;
+    width: 40px;
+    height: 40px;
+  }
+  #spf-{{ section.id }} .spf__selected-chip[hidden] { display: none; }
+  #spf-{{ section.id }} .spf__selected-chip-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1.5px solid #e5e5e5;
+    display: block;
+  }
+  #spf-{{ section.id }} .spf__selected-chip-x {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #111;
+    color: #fff;
+    border: 1.5px solid #fff;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    line-height: 1;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #spf-{{ section.id }} .spf__steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: #999;
+    font-size: 13px;
+    flex-wrap: wrap;
+    flex: 1 1 auto;
+  }
+  #spf-{{ section.id }} .spf__step-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  #spf-{{ section.id }} .spf__step-pill::after {
+    content: '›';
+    margin-left: 10px;
+    color: #ccc;
+  }
+  #spf-{{ section.id }} .spf__step-pill:last-child::after { content: ''; }
+  #spf-{{ section.id }} .spf__step-num {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 1.5px solid currentColor;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  #spf-{{ section.id }} .spf__step-pill.is-active {
+    color: #111;
+  }
+  #spf-{{ section.id }} .spf__step-pill.is-done {
+    color: #2BB673;
+  }
+  #spf-{{ section.id }} .spf__cta {
+    appearance: none;
+    background: #111;
+    color: #fff;
+    border: 0;
+    border-radius: 999px;
+    padding: 12px 22px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 180ms ease, transform 180ms ease;
+  }
+  #spf-{{ section.id }} .spf__cta:not([disabled]):hover { background: #333; }
+  #spf-{{ section.id }} .spf__cta:not([disabled]):active { transform: translateY(1px); }
+  #spf-{{ section.id }} .spf__cta[disabled] {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  #spf-{{ section.id }} .spf__cta-arrow {
+    display: inline-block;
+    transition: transform 180ms ease;
+  }
+  #spf-{{ section.id }} .spf__cta:hover .spf__cta-arrow { transform: translateX(2px); }
+
+  /* Mobile */
+  /* ---------- Mobile (≤767.98px) ---------- */
+  @media (max-width: 767.98px) {
+    /* Mobile bottom bar wraps the step pills to a second row,
+       so reserve more height to keep .spf__main clear of it. */
+    #spf-{{ section.id }} {
+      --spf-bottom-h: 104px;
+    }
+    /* Keep the desktop position:fixed model for both .spf__main and .spf__bottom
+       — it pins directly to the visual viewport and bypasses any nested flex chain
+       (the inner <form> wrapper breaks plain flex propagation). */
+    #spf-{{ section.id }} .spf__main {
+      grid-template-columns: 1fr !important;
+      grid-template-rows: 38vh 1fr !important;
+    }
+    #spf-{{ section.id }} .spf__media {
+      min-height: 0 !important;
+      aspect-ratio: auto !important;
+    }
+    #spf-{{ section.id }} .spf__image {
+      max-width: 78% !important;
+      max-height: 88% !important;
+    }
+    /* Drop the full-vertical-fill case image rule on mobile — too tall */
+    #spf-{{ section.id }}[data-current-step="1"] .spf__image.is-active[data-variant-id],
+    #spf-{{ section.id }}[data-current-step="3"] .spf__image.is-active[data-variant-id] {
+      height: auto !important;
+      width: auto !important;
+      max-width: 60% !important;
+      max-height: 90% !important;
+    }
+    #spf-{{ section.id }} .spf__panel {
+      padding: 20px 16px 16px !important;
+      overflow-y: auto;
+    }
+    #spf-{{ section.id }} .spf__step:not([hidden]) {
+      max-width: 100% !important;
+    }
+    #spf-{{ section.id }} .spf__step-heading {
+      font-size: 24px;
+      line-height: 28px;
+      margin: 0 0 12px;
+    }
+    #spf-{{ section.id }} .spf__step-heading--script {
+      font-size: 34px;
+      line-height: 1.1;
+    }
+    #spf-{{ section.id }} .spf__step-sub {
+      font-size: 12px;
+      margin-bottom: 14px;
+    }
+    #spf-{{ section.id }} .spf__features {
+      gap: 10px;
+      margin: 0 0 18px;
+      font-size: 12px;
+    }
+    #spf-{{ section.id }} .spf__variants {
+      max-width: 100%;
+      gap: 10px;
+    }
+    #spf-{{ section.id }} .spf__variant {
+      padding: 14px 16px;
+      min-height: 56px;
+      gap: 12px;
+    }
+    #spf-{{ section.id }} .spf__swatch {
+      width: 24px;
+      height: 24px;
+    }
+    #spf-{{ section.id }} .spf__variant-name {
+      font-size: 14px;
+    }
+    #spf-{{ section.id }} .spf__variant.is-selected::after {
+      width: 20px;
+      height: 20px;
+      font-size: 11px;
+    }
+    #spf-{{ section.id }} .spf__scents {
+      gap: {{ s.scent_grid_gap | default: 12 }}px;
+      max-width: 100%;
+    }
+    #spf-{{ section.id }} .spf__scent-counter {
+      font-size: 12px;
+      margin: 0 0 14px;
+    }
+    #spf-{{ section.id }} .spf__scent-name {
+      font-size: 11px;
+    }
+    #spf-{{ section.id }} .spf__scent-notes {
+      font-size: 9px;
+    }
+    /* Review card — full width with smaller padding */
+    #spf-{{ section.id }} .spf__review {
+      max-width: 100%;
+    }
+    #spf-{{ section.id }} .spf__review-row {
+      padding: 12px 14px;
+      font-size: 13px;
+    }
+    #spf-{{ section.id }} .spf__review-row--total {
+      font-size: 15px;
+    }
+    #spf-{{ section.id }} .spf__review-scent-img {
+      width: 36px;
+      height: 36px;
+    }
+    #spf-{{ section.id }} .spf__review-scent-notes {
+      font-size: 10px;
+      max-width: 140px;
+    }
+    /* Bottom bar — back + chip + CTA on row 1, step pills row 2 */
+    #spf-{{ section.id }} .spf__bottom {
+      padding: 10px 14px;
+      flex-wrap: wrap;
+      gap: 8px;
+      row-gap: 6px;
+    }
+    #spf-{{ section.id }} .spf__back {
+      order: 1;
+      width: 36px;
+      height: 36px;
+      font-size: 14px;
+    }
+    #spf-{{ section.id }} .spf__cta-group {
+      order: 2;
+      margin-left: auto;
+      gap: 10px;
+    }
+    #spf-{{ section.id }} .spf__selected-chip,
+    #spf-{{ section.id }} .spf__selected-chip-img {
+      width: 32px;
+      height: 32px;
+    }
+    #spf-{{ section.id }} .spf__cta {
+      padding: 10px 18px;
+      font-size: 12px;
+    }
+    #spf-{{ section.id }} .spf__steps {
+      flex: 1 0 100%;
+      justify-content: center;
+      order: 3;
+      font-size: 12px;
+      gap: 6px;
+    }
+    #spf-{{ section.id }} .spf__step-pill::after {
+      margin-left: 6px;
+    }
+    #spf-{{ section.id }} .spf__step-num {
+      width: 18px;
+      height: 18px;
+      font-size: 10px;
+    }
+    #spf-{{ section.id }} .spf__step-pill .spf__step-label {
+      display: inline;
+      font-size: 12px;
+    }
+  }
+{% endstyle %}
+
+<script>
+(function () {
+  var root = document.getElementById('spf-{{ section.id }}');
+  if (!root) return;
+
+  var form = document.getElementById('spf-form-{{ section.id }}');
+  var ctaBtn = document.getElementById('spf-cta-{{ section.id }}');
+  var ctaLabel = root.querySelector('#spf-cta-label');
+  var stepPills = root.querySelectorAll('.spf__step-pill');
+  var stepPanels = root.querySelectorAll('.spf__step');
+  // The per-variant review images have BOTH data-variant-id AND
+  // data-for-step. Exclude them from `variantImages` so the step-1
+  // fallback path doesn't accidentally activate the review image
+  // alongside the regular product image.
+  var variantImages = root.querySelectorAll('.spf__image[data-variant-id]:not([data-for-step])');
+  var stepImages = root.querySelectorAll('.spf__image[data-for-step]');
+
+  function showActiveImageForStep(n) {
+    var selectedVariantId = document.getElementById('spf-variant-id').value;
+
+    // 1. Most specific: an image tagged with BOTH this step AND the
+    //    selected variant (e.g. the per-variant review image at step 3).
+    var stepVariantImg = root.querySelector(
+      '.spf__image[data-for-step="' + n + '"][data-variant-id="' + selectedVariantId + '"]'
+    );
+    if (stepVariantImg) {
+      variantImages.forEach(function (img) { img.classList.remove('is-active'); });
+      stepImages.forEach(function (img) {
+        img.classList.toggle('is-active', img === stepVariantImg);
+      });
+      return;
+    }
+
+    // 2. Step has a single shared image (regardless of variant) — e.g.
+    //    the scent step image at step 2.
+    var stepImg = root.querySelector(
+      '.spf__image[data-for-step="' + n + '"]:not([data-variant-id])'
+    );
+    if (stepImg) {
+      variantImages.forEach(function (img) { img.classList.remove('is-active'); });
+      stepImages.forEach(function (img) {
+        img.classList.toggle('is-active', img === stepImg);
+      });
+      return;
+    }
+
+    // 3. Fallback — show the selected variant's product image.
+    stepImages.forEach(function (img) { img.classList.remove('is-active'); });
+    variantImages.forEach(function (img) {
+      img.classList.toggle('is-active', img.dataset.variantId === selectedVariantId);
+    });
+  }
+
+  var ctaLabels = {
+    1: {{ s.step1_cta | default: 'Choose case' | json }},
+    2: {{ s.step3_cta | default: 'Choose scent' | json }},
+    3: {{ s.step4_cta | default: 'Checkout' | json }}
+  };
+
+  var totalSteps = 3;
+
+  var backBtn = document.getElementById('spf-back-{{ section.id }}');
+  var chipEl = document.getElementById('spf-selected-chip');
+  var chipImg = document.getElementById('spf-selected-chip-img');
+  var chipRemove = document.getElementById('spf-selected-chip-remove');
+
+  function updateSelectedChip(n) {
+    if (!chipEl) return;
+    var selectedScent = root.querySelector('.spf__scent.is-selected');
+    if (n === 2 && selectedScent && chipImg) {
+      // Prefer the scent block's custom "Selected image (chip)" if set, else fall back to the tile image
+      var customChipSrc = selectedScent.dataset.scentSelectedImage;
+      if (customChipSrc) {
+        chipImg.src = customChipSrc;
+      } else {
+        var tileImg = selectedScent.querySelector('.spf__scent-media img');
+        if (tileImg) chipImg.src = tileImg.src;
+      }
+      chipImg.alt = selectedScent.dataset.scentName || '';
+      chipEl.hidden = false;
+    } else {
+      chipEl.hidden = true;
+    }
+  }
+
+  function isStepComplete(n) {
+    if (n === 1) {
+      // A case variant is always pre-selected (first_variant), so this passes
+      return !!document.getElementById('spf-variant-id').value;
+    }
+    if (n === 2) {
+      // Scent step — require at least one scent tile to be selected
+      return !!root.querySelector('.spf__scent.is-selected');
+    }
+    return true;
+  }
+
+  function updateCTAState(n) {
+    if (!ctaBtn) return;
+    var canProceed = isStepComplete(n);
+    ctaBtn.disabled = !canProceed;
+    ctaBtn.setAttribute('aria-disabled', canProceed ? 'false' : 'true');
+  }
+
+  function setStep(n) {
+    n = Math.min(Math.max(n, 1), totalSteps);
+    // Block forward navigation past an incomplete step
+    var current = parseInt(root.dataset.currentStep || '1', 10);
+    if (n > current && !isStepComplete(current)) {
+      n = current;
+    }
+    root.dataset.currentStep = n;
+    stepPanels.forEach(function (p) {
+      p.hidden = parseInt(p.dataset.step, 10) !== n;
+    });
+    stepPills.forEach(function (pill) {
+      var pn = parseInt(pill.dataset.stepPill, 10);
+      pill.classList.toggle('is-active', pn === n);
+      pill.classList.toggle('is-done', pn < n);
+    });
+    if (ctaLabel && ctaLabels[n]) ctaLabel.textContent = ctaLabels[n];
+    if (backBtn) backBtn.disabled = n <= 1;
+    updateSelectedChip(n);
+    showActiveImageForStep(n);
+    updateCTAState(n);
+
+    if (n === 3) updateSummary();
+  }
+
+  // Variant select (Step 1)
+  root.querySelectorAll('.spf__variant').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      root.querySelectorAll('.spf__variant').forEach(function (v) {
+        v.classList.remove('is-selected');
+        v.setAttribute('aria-checked', 'false');
+      });
+      btn.classList.add('is-selected');
+      btn.setAttribute('aria-checked', 'true');
+
+      var variantId = btn.dataset.variantId;
+      var variantTitle = btn.dataset.variantTitle;
+      document.getElementById('spf-variant-id').value = variantId;
+      document.getElementById('spf-prop-case').value = variantTitle || '';
+
+      // Swap left image — only when current step has no custom step image
+      showActiveImageForStep(parseInt(root.dataset.currentStep, 10));
+    });
+  });
+
+  // Scent select (Step 2)
+  var scentCounterCurrent = root.querySelector('.spf__counter-current');
+  var scentCounterMsg = root.querySelector('.spf__counter-msg');
+
+  function resetScentSelection() {
+    root.querySelectorAll('.spf__scent').forEach(function (s) {
+      s.classList.remove('is-selected');
+      s.setAttribute('aria-checked', 'false');
+    });
+    document.getElementById('spf-prop-scent').value = '';
+    if (scentCounterCurrent) scentCounterCurrent.textContent = '0';
+    if (scentCounterMsg) scentCounterMsg.textContent = 'Select 1 more before proceeding.';
+    root.classList.remove('spf--scent-complete');
+    updateSelectedChip(parseInt(root.dataset.currentStep, 10));
+    updateCTAState(parseInt(root.dataset.currentStep, 10));
+  }
+
+  root.querySelectorAll('.spf__scent').forEach(function (btn) {
+    btn.addEventListener('click', function (e) {
+      // Minus inside the qty stepper → deselect this tile (max 1)
+      if (e.target.closest('.spf__scent-qty-minus')) {
+        resetScentSelection();
+        return;
+      }
+      // Plus is capped at 1 — no-op
+      if (e.target.closest('.spf__scent-qty-plus')) {
+        return;
+      }
+      root.querySelectorAll('.spf__scent').forEach(function (s) {
+        s.classList.remove('is-selected');
+        s.setAttribute('aria-checked', 'false');
+      });
+      btn.classList.add('is-selected');
+      btn.setAttribute('aria-checked', 'true');
+      document.getElementById('spf-prop-scent').value = btn.dataset.scentName || '';
+      // Update the "Scent 0 / 1 selected …" counter line
+      if (scentCounterCurrent) scentCounterCurrent.textContent = '1';
+      if (scentCounterMsg) scentCounterMsg.textContent = 'Ready to checkout.';
+      root.classList.add('spf--scent-complete');
+      updateSelectedChip(parseInt(root.dataset.currentStep, 10));
+      updateCTAState(parseInt(root.dataset.currentStep, 10));
+    });
+  });
+
+  // Back button → previous step
+  if (backBtn) {
+    backBtn.addEventListener('click', function () {
+      var current = parseInt(root.dataset.currentStep, 10);
+      setStep(current - 1);
+    });
+  }
+
+  // Selected scent chip × → deselect scent
+  if (chipRemove) {
+    chipRemove.addEventListener('click', function () {
+      resetScentSelection();
+    });
+  }
+
+  function updateSummary() {
+    var caseEl = document.getElementById('spf-summary-case');
+    var scentNameEl = document.getElementById('spf-summary-scent');
+    var scentNotesEl = document.getElementById('spf-summary-scent-notes');
+    var scentImgEl = document.getElementById('spf-summary-scent-img');
+
+    if (caseEl) caseEl.textContent = document.getElementById('spf-prop-case').value || '—';
+
+    var selectedScent = root.querySelector('.spf__scent.is-selected');
+    if (selectedScent) {
+      if (scentNameEl) scentNameEl.textContent = selectedScent.dataset.scentName || '—';
+      var notesEl = selectedScent.querySelector('.spf__scent-notes');
+      if (scentNotesEl) scentNotesEl.textContent = notesEl ? notesEl.textContent.trim() : '';
+      // Review row uses the per-scent "Selected image (chip)" only — no tile fallback,
+      // so the merchant has explicit control over what's shown in the review summary.
+      var chipImgSrc = selectedScent.dataset.scentSelectedImage;
+      if (scentImgEl) {
+        if (chipImgSrc) {
+          scentImgEl.src = chipImgSrc;
+          scentImgEl.hidden = false;
+        } else {
+          scentImgEl.hidden = true;
+        }
+      }
+    } else {
+      if (scentNameEl) scentNameEl.textContent = '—';
+      if (scentNotesEl) scentNotesEl.textContent = '';
+      if (scentImgEl) scentImgEl.hidden = true;
+    }
+  }
+
+  // Step pill click → jump to that step
+  stepPills.forEach(function (pill) {
+    pill.addEventListener('click', function () {
+      setStep(parseInt(pill.dataset.stepPill, 10));
+    });
+  });
+
+  // CTA click → next step, or submit on final
+  ctaBtn.addEventListener('click', function () {
+    var current = parseInt(root.dataset.currentStep, 10);
+    if (current >= totalSteps) {
+      // Submit form to /cart/add then go to /checkout (return_to hidden field handles redirect)
+      form.submit();
+      return;
+    }
+    setStep(current + 1);
+  });
+
+  setStep(1);
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Starter Pack Flow",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Left panel"
+    },
+    {
+      "type": "color",
+      "id": "left_bg_color",
+      "label": "Background color",
+      "default": "#FFF8B8"
+    },
+    {
+      "type": "range",
+      "id": "media_image_size",
+      "label": "Product image size",
+      "info": "Max-width / max-height of the floating product image as a % of the left panel.",
+      "min": 50,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 92
+    },
+    {
+      "type": "range",
+      "id": "panel_max_width",
+      "label": "Right panel content width",
+      "info": "Caps the width of the heading + form on the right, centred in the column.",
+      "min": 320,
+      "max": 720,
+      "step": 10,
+      "unit": "px",
+      "default": 480
+    },
+    {
+      "type": "range",
+      "id": "float_amplitude",
+      "label": "Float amplitude",
+      "info": "How far the product image moves up and down (px).",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "float_duration",
+      "label": "Float speed",
+      "info": "Time for one full float cycle (deci-seconds — 35 = 3.5s).",
+      "min": 15,
+      "max": 80,
+      "step": 5,
+      "default": 35
+    },
+    {
+      "type": "header",
+      "content": "Step 1 — Case"
+    },
+    {
+      "type": "text",
+      "id": "step1_heading",
+      "label": "Heading",
+      "default": "Choose your case"
+    },
+    {
+      "type": "text",
+      "id": "step1_features",
+      "label": "Features (separate with |)",
+      "default": "Durable|Plastic-free refills|Carbon neutral"
+    },
+    {
+      "type": "text",
+      "id": "step1_link_label",
+      "label": "Link label",
+      "default": "Already have a case?"
+    },
+    {
+      "type": "url",
+      "id": "step1_link_url",
+      "label": "Link URL"
+    },
+    {
+      "type": "text",
+      "id": "step1_cta",
+      "label": "CTA label",
+      "default": "Choose case"
+    },
+    {
+      "type": "color",
+      "id": "case_swatch_color_1",
+      "label": "Case 1 swatch color",
+      "default": "#F2D6D2"
+    },
+    {
+      "type": "color",
+      "id": "case_swatch_color_2",
+      "label": "Case 2 swatch color",
+      "default": "#B8CDE2"
+    },
+    {
+      "type": "color",
+      "id": "case_swatch_color_3",
+      "label": "Case 3 swatch color",
+      "default": "#cccccc"
+    },
+    {
+      "type": "color",
+      "id": "case_swatch_color_4",
+      "label": "Case 4 swatch color",
+      "default": "#cccccc"
+    },
+    {
+      "type": "header",
+      "content": "Step 2 — Plan"
+    },
+    {
+      "type": "text",
+      "id": "step2_heading",
+      "label": "Heading",
+      "default": "Choose your plan"
+    },
+    {
+      "type": "textarea",
+      "id": "step2_subtext",
+      "label": "Subtext"
+    },
+    {
+      "type": "text",
+      "id": "step2_cta",
+      "label": "CTA label",
+      "default": "Choose plan"
+    },
+    {
+      "type": "header",
+      "content": "Step 3 — Scent"
+    },
+    {
+      "type": "image_picker",
+      "id": "step3_image",
+      "label": "Left-panel image (Scent step)",
+      "info": "Shown on the left yellow panel while the merchant is on the scent step. Leave blank to keep showing the case image."
+    },
+    {
+      "type": "range",
+      "id": "scent_grid_gap",
+      "label": "Scent grid gap",
+      "min": 0,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "default": 18
+    },
+    {
+      "type": "text",
+      "id": "step3_heading",
+      "label": "Heading",
+      "default": "Choose your scent"
+    },
+    {
+      "type": "textarea",
+      "id": "step3_subtext",
+      "label": "Subtext"
+    },
+    {
+      "type": "text",
+      "id": "step3_cta",
+      "label": "CTA label",
+      "default": "Choose scent"
+    },
+    {
+      "type": "header",
+      "content": "Step 4 — Checkout"
+    },
+    {
+      "type": "text",
+      "id": "step4_heading",
+      "label": "Heading",
+      "default": "Review your starter pack"
+    },
+    {
+      "type": "text",
+      "id": "step4_cta",
+      "label": "CTA label",
+      "default": "Checkout"
+    },
+    {
+      "type": "header",
+      "content": "Step 4 — Review image per case variant"
+    },
+    {
+      "type": "paragraph",
+      "content": "Override the left-panel image on the Review step per case variant. Variant order matches the case swatches above (1 = first variant, 2 = second, …). Paste any image URL (Shopify CDN, Files library, or external) into the URL field — it takes precedence. The image picker is a fallback. If both are blank, the variant's product image is used."
+    },
+    {
+      "type": "text",
+      "id": "review_image_variant_1_url",
+      "label": "Review image URL — Variant 1 (Blush)",
+      "default": "https://cdn.shopify.com/s/files/1/0778/7482/3353/files/Screenshot_2026-05-11_at_7.02.04_PM.png?v=1778512197"
+    },
+    {
+      "type": "image_picker",
+      "id": "review_image_variant_1",
+      "label": "Review image picker — Variant 1 (fallback)"
+    },
+    {
+      "type": "text",
+      "id": "review_image_variant_2_url",
+      "label": "Review image URL — Variant 2 (Ocean Blue)",
+      "default": "https://cdn.shopify.com/s/files/1/0778/7482/3353/files/Screenshot_2026-05-11_at_7.02.12_PM.png?v=1778512197"
+    },
+    {
+      "type": "image_picker",
+      "id": "review_image_variant_2",
+      "label": "Review image picker — Variant 2 (fallback)"
+    },
+    {
+      "type": "text",
+      "id": "review_image_variant_3_url",
+      "label": "Review image URL — Variant 3"
+    },
+    {
+      "type": "image_picker",
+      "id": "review_image_variant_3",
+      "label": "Review image picker — Variant 3 (fallback)"
+    },
+    {
+      "type": "text",
+      "id": "review_image_variant_4_url",
+      "label": "Review image URL — Variant 4"
+    },
+    {
+      "type": "image_picker",
+      "id": "review_image_variant_4",
+      "label": "Review image picker — Variant 4 (fallback)"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "plan",
+      "name": "Plan option",
+      "limit": 4,
+      "settings": [
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Name",
+          "default": "One-time"
+        },
+        {
+          "type": "text",
+          "id": "description",
+          "label": "Description"
+        },
+        {
+          "type": "text",
+          "id": "price_label",
+          "label": "Price label"
+        },
+        {
+          "type": "text",
+          "id": "badge",
+          "label": "Badge (optional)"
+        }
+      ]
+    },
+    {
+      "type": "scent",
+      "name": "Scent option",
+      "limit": 12,
+      "settings": [
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Name",
+          "default": "Good Surf"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Tile image"
+        },
+        {
+          "type": "image_picker",
+          "id": "selected_image",
+          "label": "Selected image (chip)",
+          "info": "Shown in the small circle next to the CTA when this scent is selected. Leave blank to fall back to the tile image."
+        },
+        {
+          "type": "text",
+          "id": "notes",
+          "label": "Notes",
+          "info": "Short note list shown under the title (e.g. \"Sea Salt Musk • Patchouli • Green Apple\").",
+          "default": "Sea Salt Musk • Patchouli • Green Apple"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Starter Pack Flow",
+      "blocks": [
+        { "type": "plan", "settings": { "name": "One-time", "description": "Get your starter pack delivered once.", "price_label": "" } },
+        { "type": "plan", "settings": { "name": "Subscribe & save 15%", "description": "Refills delivered automatically. Cancel anytime.", "badge": "Most popular" } },
+        { "type": "scent", "settings": { "name": "Coconut Vanilla Sandalwood" } },
+        { "type": "scent", "settings": { "name": "Coconut Vanilla Sandalwood" } },
+        { "type": "scent", "settings": { "name": "Coconut Vanilla Sandalwood" } },
+        { "type": "scent", "settings": { "name": "Coconut Vanilla Sandalwood" } },
+        { "type": "scent", "settings": { "name": "Coconut Vanilla Sandalwood" } },
+        { "type": "scent", "settings": { "name": "Coconut Vanilla Sandalwood" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

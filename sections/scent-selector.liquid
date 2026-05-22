@@ -1,0 +1,920 @@
+{%- liquid
+  assign sec_st = section.settings
+-%}
+<div
+  id="scent-selector-{{ section.id }}"
+  class="scent-selector"
+  data-scent-selector
+  data-section-id="{{ section.id }}"
+  data-lock-scroll="{% if sec_st.lock_scroll %}true{% else %}false{% endif %}"
+  data-advance-ms="{{ sec_st.advance_duration_ms }}"
+  data-storage-key="{{ sec_st.storage_key | default: 'glozin_selected_scent' }}"
+  style="
+    --ss-bg: {{ sec_st.background_color }};
+    --ss-fg: {{ sec_st.text_color }};
+    --ss-panel: {{ sec_st.panel_color }};
+    --ss-cta-bg: {{ sec_st.cta_bg_color }};
+    --ss-cta-border: {{ sec_st.cta_border_color }};
+    --ss-side-desktop: {{ sec_st.side_margin_desktop }}px;
+    --ss-side-mobile: {{ sec_st.side_margin_mobile }}px;
+    margin-top: {{ sec_st.margin_top_desktop | default: 0 }}px;
+    margin-bottom: {{ sec_st.margin_bottom_desktop | default: 0 }}px;
+  "
+>
+  <div class="scent-selector__inner">
+
+    {%- if sec_st.hero_image != blank -%}
+      <div class="scent-selector__hero">
+        <img
+          class="scent-selector__hero-img"
+          src="{{ sec_st.hero_image | image_url: width: 1200 }}"
+          alt="{{ sec_st.heading | escape }}"
+          loading="lazy"
+          width="{{ sec_st.hero_image.width }}"
+          height="{{ sec_st.hero_image.height }}"
+        >
+      </div>
+    {%- endif -%}
+
+    <div class="scent-selector__panel">
+
+      {%- if sec_st.heading != blank -%}
+        <h2 class="scent-selector__heading">{{ sec_st.heading }}</h2>
+      {%- endif -%}
+
+      {%- if sec_st.description_1 != blank -%}
+        <p class="scent-selector__desc">{{ sec_st.description_1 }}</p>
+      {%- endif -%}
+      {%- if sec_st.description_2 != blank -%}
+        <p class="scent-selector__desc">{{ sec_st.description_2 }}</p>
+      {%- endif -%}
+      {%- if sec_st.description_3 != blank -%}
+        <p class="scent-selector__desc">{{ sec_st.description_3 }}</p>
+      {%- endif -%}
+
+      {%- if section.blocks.size > 0 -%}
+        <div class="scent-selector__tiles" role="radiogroup" aria-label="Scent options">
+          {%- for block in section.blocks -%}
+            {%- liquid
+              assign b = block.settings
+              # Prefer section-level scent_image_<position> (1..6), then
+              # the block's per-tile image, then the section's shared
+              # default. Lets the merchant set all 6 images from a
+              # single screen in the customizer without diving into
+              # each block.
+              assign section_img_key = 'scent_image_' | append: forloop.index
+              assign section_img = section.settings[section_img_key]
+              assign tile_image = section_img | default: b.tile_image | default: sec_st.tile_image
+            -%}
+            <button
+              type="button"
+              class="scent-selector__tile"
+              role="radio"
+              aria-checked="false"
+              data-scent-id="{{ block.id }}"
+              data-scent-name="{{ b.name | escape }}"
+              {{ block.shopify_attributes }}
+            >
+              <span class="scent-selector__tile-media">
+                {%- if tile_image != blank -%}
+                  <img
+                    class="scent-selector__tile-img"
+                    src="{{ tile_image | image_url: width: 400 }}"
+                    alt="{{ b.name | escape }}"
+                    loading="lazy"
+                    width="{{ tile_image.width }}"
+                    height="{{ tile_image.height }}"
+                  >
+                {%- else -%}
+                  <img
+                    class="scent-selector__tile-img"
+                    src="https://cdn.shopify.com/s/files/1/0778/7482/3353/files/Rectangle_4.png?v=1777193204"
+                    alt="{{ b.name | escape }}"
+                    loading="lazy"
+                  >
+                {%- endif -%}
+                <span class="scent-selector__tile-add" aria-hidden="true">
+                  <span class="scent-selector__add-label">ADD</span>
+                  <span class="scent-selector__check-label" style="display:none">✓</span>
+                </span>
+              </span>
+              <span class="scent-selector__tile-label">{{ b.name }}</span>
+            </button>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+
+      <button type="button" class="scent-selector__cta" data-scent-cta disabled aria-disabled="true">
+        <span class="scent-selector__cta-label">{{ sec_st.cta_label | default: 'Choose Scent' }}</span>
+      </button>
+
+    </div>
+  </div>
+</div>
+
+{% style %}
+  #scent-selector-{{ section.id }} {
+    position: relative;
+    background-color: var(--ss-bg, #ffffff);
+    color: var(--ss-fg, #111111);
+  }
+  /* Desktop — side-by-side: content left, image right.
+     Mirrors case-selector but flipped (case has image left, content right). */
+  #scent-selector-{{ section.id }} .scent-selector__inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: stretch;
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+    gap: 24px;
+    grid-auto-rows: {{ sec_st.card_height | default: 700 }}px;
+    box-sizing: border-box;
+  }
+  /* When no hero image is set, panel spans full width */
+  #scent-selector-{{ section.id }} .scent-selector__inner:not(:has(.scent-selector__hero)) {
+    grid-template-columns: 1fr;
+  }
+
+  /* Hero image — right column on desktop */
+  #scent-selector-{{ section.id }} .scent-selector__hero {
+    grid-column: 2;
+    grid-row: 1;
+    width: 100%;
+    height: 100%;
+    border-radius: {{ sec_st.hero_radius | default: 14 }}px;
+    overflow: hidden;
+    line-height: 0;
+    background-color: #f4f4f4;
+  }
+  #scent-selector-{{ section.id }} .scent-selector__hero-img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Panel — left column on desktop */
+  #scent-selector-{{ section.id }} .scent-selector__panel {
+    grid-column: 1;
+    grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    background-color: var(--ss-panel, #EDEEF2);
+    border-radius: {{ sec_st.panel_radius | default: 14 }}px;
+    padding: 48px 40px;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+  #scent-selector-{{ section.id }} .scent-selector__heading {
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    font-size: 24px;
+    line-height: 28px;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+    color: var(--ss-fg, #000);
+    margin: 0 0 20px;
+  }
+  #scent-selector-{{ section.id }} .scent-selector__desc {
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 18px;
+    letter-spacing: 0;
+    color: var(--ss-fg, #000);
+    margin: 0 0 14px;
+  }
+  #scent-selector-{{ section.id }} .scent-selector__desc:last-of-type {
+    margin-bottom: 24px;
+  }
+
+  /* Tiles grid */
+  #scent-selector-{{ section.id }} .scent-selector__tiles {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+  #scent-selector-{{ section.id }} .scent-selector__tile {
+    appearance: none;
+    background: transparent;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  #scent-selector-{{ section.id }} .scent-selector__tile-media {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: 10px;
+    overflow: hidden;
+    background-color: #EDEEF2;
+    transition: outline-color 180ms ease, transform 180ms ease;
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+  #scent-selector-{{ section.id }} .scent-selector__tile.is-selected .scent-selector__tile-media {
+    outline-color: #000000;
+  }
+  #scent-selector-{{ section.id }} .scent-selector__tile:hover .scent-selector__tile-media {
+    transform: scale(1.02);
+  }
+  #scent-selector-{{ section.id }} .scent-selector__tile-img,
+  #scent-selector-{{ section.id }} .scent-selector__tile-placeholder {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  #scent-selector-{{ section.id }} .scent-selector__tile-placeholder {
+    background-color: #EDEEF2;
+  }
+  /* Glass pill ADD button — 39×14px, position controlled by schema settings */
+  #scent-selector-{{ section.id }} .scent-selector__tile-add {
+    position: absolute;
+    bottom: {{ sec_st.tile_add_bottom | default: 8 }}px;
+    left: calc(50% + {{ sec_st.tile_add_offset_x | default: 0 }}px);
+    transform: translateX(-50%);
+    width: 39px;
+    height: 14px;
+    border-radius: 42px;
+    background: rgba(255, 255, 255, 0.18);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    backdrop-filter: blur(20px) saturate(160%);
+    box-shadow:
+      0 2px 20px rgba(0, 0, 0, 0.10),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.30),
+      inset 0 1px 0.5px rgba(255, 255, 255, 0.50);
+    color: #000;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 7px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    transition: background 180ms ease, box-shadow 180ms ease;
+  }
+  #scent-selector-{{ section.id }} .scent-selector__tile.is-selected .scent-selector__tile-add {
+    background: rgba(0, 0, 0, 0.72);
+    box-shadow:
+      0 2px 20px rgba(0, 0, 0, 0.18),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+    color: #fff;
+  }
+  /* Desktop ADD button — top/left-anchored, 56×20 with 5.29px border per Figma spec */
+  @media (min-width: 768px) {
+    #scent-selector-{{ section.id }} .scent-selector__tile-add {
+      box-sizing: border-box;
+      top: {{ sec_st.tile_add_top_desktop | default: 100 }}px;
+      left: {{ sec_st.tile_add_left_desktop | default: 64 }}px;
+      bottom: auto;
+      right: auto;
+      transform: none;
+      width: 56px;
+      height: 20px;
+      border-width: 5.29px;
+      border-style: solid;
+      border-color: rgba(255, 255, 255, 0.30);
+      box-shadow:
+        0 2px 20px rgba(0, 0, 0, 0.10),
+        inset 0 1px 0.5px rgba(255, 255, 255, 0.50);
+      font-size: 9px;
+    }
+    #scent-selector-{{ section.id }} .scent-selector__tile.is-selected .scent-selector__tile-add {
+      border-color: rgba(255, 255, 255, 0.08);
+    }
+  }
+  #scent-selector-{{ section.id }} .scent-selector__tile.is-selected .scent-selector__add-label {
+    display: none;
+  }
+  #scent-selector-{{ section.id }} .scent-selector__tile.is-selected .scent-selector__check-label {
+    display: inline !important;
+  }
+  #scent-selector-{{ section.id }} .scent-selector__tile-label {
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    font-size: 11px;
+    line-height: 14px;
+    letter-spacing: 0;
+    color: var(--ss-fg, #000);
+    word-break: break-word;
+  }
+
+  /* CTA — liquid-glass pill, size driven by padding (customizable per breakpoint) */
+  #scent-selector-{{ section.id }} .scent-selector__cta {
+    appearance: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+    margin-right: auto;
+    padding: {{ sec_st.cta_padding_y_desktop | default: 16 }}px {{ sec_st.cta_padding_x_desktop | default: 48 }}px;
+    border: 0;
+    border-radius: 42px;
+    background:
+      radial-gradient(140% 60% at 50% -10%, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0) 55%),
+      rgba(255, 255, 255, 0.04);
+    color: var(--ss-fg, #000);
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    font-size: 12px;
+    line-height: 14px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    backdrop-filter: blur(20px) saturate(160%);
+    box-shadow:
+      0 2px 20px rgba(0, 0, 0, 0.10),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.01),
+      inset 0 1px 0.5px rgba(255, 255, 255, 0.55),
+      inset 0 -1px 0.5px rgba(0, 0, 0, 0.06);
+    box-sizing: border-box;
+    transition: opacity 200ms ease, transform 200ms ease, background 200ms ease, box-shadow 200ms ease;
+  }
+  #scent-selector-{{ section.id }} .scent-selector__cta[disabled],
+  #scent-selector-{{ section.id }} .scent-selector__cta[aria-disabled="true"] {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+  #scent-selector-{{ section.id }} .scent-selector__cta:not([disabled]):hover {
+    background:
+      radial-gradient(140% 65% at 50% -10%, rgba(255,255,255,0.60) 0%, rgba(255,255,255,0) 55%),
+      rgba(255, 255, 255, 0.10);
+    box-shadow:
+      0 6px 24px rgba(0, 0, 0, 0.14),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+      inset 0 1px 0.5px rgba(255, 255, 255, 0.70),
+      inset 0 -1px 0.5px rgba(0, 0, 0, 0.08);
+    transform: translateY(-1px);
+  }
+  #scent-selector-{{ section.id }} .scent-selector__cta:not([disabled]):active {
+    transform: translateY(0);
+  }
+  #scent-selector-{{ section.id }} .scent-selector__cta-label {
+    display: inline-block;
+  }
+
+  /* Mobile — stack: hero on top, panel below (per Figma spec) */
+  @media (max-width: 767.98px) {
+    #scent-selector-{{ section.id }} {
+      margin-top: {{ sec_st.margin_top_mobile | default: 0 }}px;
+      margin-bottom: {{ sec_st.margin_bottom_mobile | default: 0 }}px;
+    }
+    #scent-selector-{{ section.id }} .scent-selector__inner {
+      grid-template-columns: 1fr;
+      grid-auto-rows: auto;
+      gap: 0;
+      padding: 0 var(--ss-side-mobile, 20px);
+    }
+    #scent-selector-{{ section.id }} .scent-selector__hero {
+      grid-column: auto;
+      grid-row: auto;
+      height: auto;
+      margin-top: {{ sec_st.hero_overlap_mobile | default: -9 }}px;
+    }
+    #scent-selector-{{ section.id }} .scent-selector__hero-img {
+      height: {{ sec_st.hero_height_mobile | default: 419 }}px;
+    }
+    #scent-selector-{{ section.id }} .scent-selector__panel {
+      grid-column: auto;
+      grid-row: auto;
+      height: auto;
+      overflow: visible;
+      padding: 28px 20px;
+      margin-top: {{ sec_st.panel_gap_mobile | default: 16 }}px;
+    }
+    #scent-selector-{{ section.id }} .scent-selector__tiles {
+      gap: 8px;
+    }
+    #scent-selector-{{ section.id }} .scent-selector__cta {
+      padding: {{ sec_st.cta_padding_y_mobile | default: 8 }}px {{ sec_st.cta_padding_x_mobile | default: 24 }}px;
+    }
+  }
+{% endstyle %}
+
+<script>
+  (function () {
+    var sectionId = {{ section.id | json }};
+    var root = document.getElementById('scent-selector-' + sectionId);
+    if (!root) return;
+
+    var storageKey = root.getAttribute('data-storage-key') || 'glozin_selected_scent';
+    var tiles = root.querySelectorAll('[data-scent-id]');
+    var cta = root.querySelector('[data-scent-cta]');
+    var selected = null;
+
+    if (!tiles.length || !cta) return;
+
+    function selectTile(id) {
+      selected = id;
+      tiles.forEach(function (t) {
+        var on = t.getAttribute('data-scent-id') === id;
+        t.classList.toggle('is-selected', on);
+        t.setAttribute('aria-checked', on ? 'true' : 'false');
+      });
+      cta.disabled = false;
+      cta.setAttribute('aria-disabled', 'false');
+    }
+
+    tiles.forEach(function (t) {
+      t.addEventListener('click', function () {
+        selectTile(t.getAttribute('data-scent-id'));
+      });
+    });
+
+    function smoothScrollTo(targetEl, duration) {
+      duration = duration || 700;
+      var targetY = targetEl.getBoundingClientRect().top + window.scrollY;
+      var startY = window.scrollY || window.pageYOffset;
+      var distance = targetY - startY;
+      var startTime = null;
+      function ease(t) {
+        return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+      }
+      function step(ts) {
+        if (startTime === null) startTime = ts;
+        var p = Math.min((ts - startTime) / duration, 1);
+        window.scrollTo(0, startY + distance * ease(p));
+        if (p < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+
+    cta.addEventListener('click', function () {
+      if (!selected || cta.disabled) return;
+      var name = '';
+      tiles.forEach(function (t) {
+        if (t.getAttribute('data-scent-id') === selected) {
+          name = t.getAttribute('data-scent-name') || '';
+        }
+      });
+      try {
+        localStorage.setItem(storageKey, JSON.stringify({ id: selected, name: name }));
+      } catch (e) { /* private mode etc */ }
+
+      // Walk up to the Shopify section wrapper and scroll to the next one.
+      var wrap = root.closest('[id^="shopify-section-"]') || root.parentElement;
+      var next = wrap ? wrap.nextElementSibling : null;
+      while (next && next.nodeType !== 1) next = next.nextElementSibling;
+      if (next) smoothScrollTo(next, 700);
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Scent Selector",
+  "tag": "section",
+  "disabled_on": {
+    "groups": ["header", "footer", "custom.overlay"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Hero image"
+    },
+    {
+      "type": "image_picker",
+      "id": "hero_image",
+      "label": "Hero image"
+    },
+    {
+      "type": "range",
+      "id": "hero_height_mobile",
+      "label": "Hero height — Mobile",
+      "min": 200,
+      "max": 700,
+      "step": 5,
+      "unit": "px",
+      "default": 420
+    },
+    {
+      "type": "range",
+      "id": "hero_radius",
+      "label": "Hero corner radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "hero_overlap",
+      "label": "Hero top overlap — Desktop",
+      "info": "Negative pulls the hero up over the previous section.",
+      "min": -200,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "hero_overlap_mobile",
+      "label": "Hero top overlap — Mobile",
+      "info": "Negative pulls the hero up over the previous section.",
+      "min": -100,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "default": -10
+    },
+    {
+      "type": "header",
+      "content": "Panel"
+    },
+    {
+      "type": "color",
+      "id": "panel_color",
+      "label": "Panel background color",
+      "default": "#EDEEF2"
+    },
+    {
+      "type": "range",
+      "id": "panel_radius",
+      "label": "Panel corner radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "panel_gap",
+      "label": "Gap between hero and panel — Desktop",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "panel_gap_mobile",
+      "label": "Gap between hero and panel — Mobile",
+      "min": 0,
+      "max": 80,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Text"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Choose Your Scent"
+    },
+    {
+      "type": "textarea",
+      "id": "description_1",
+      "label": "Description paragraph 1",
+      "default": "Your first refill. More than just fragrance, it's built to interact with your skin."
+    },
+    {
+      "type": "textarea",
+      "id": "description_2",
+      "label": "Description paragraph 2",
+      "default": "It responds to warmth, releases gradually, and shifts as the day moves. Light when it needs to be. Present when it matters."
+    },
+    {
+      "type": "textarea",
+      "id": "description_3",
+      "label": "Description paragraph 3",
+      "default": "Not something that fades, something that evolves."
+    },
+    {
+      "type": "header",
+      "content": "Scent tile image (shared default)"
+    },
+    {
+      "type": "image_picker",
+      "id": "tile_image",
+      "label": "Default tile image",
+      "info": "Used for every scent tile unless one of the per-tile images below or the block-level override is set."
+    },
+    {
+      "type": "header",
+      "content": "Per-tile images (1–6)"
+    },
+    {
+      "type": "image_picker",
+      "id": "scent_image_1",
+      "label": "Scent 1 image"
+    },
+    {
+      "type": "image_picker",
+      "id": "scent_image_2",
+      "label": "Scent 2 image"
+    },
+    {
+      "type": "image_picker",
+      "id": "scent_image_3",
+      "label": "Scent 3 image"
+    },
+    {
+      "type": "image_picker",
+      "id": "scent_image_4",
+      "label": "Scent 4 image"
+    },
+    {
+      "type": "image_picker",
+      "id": "scent_image_5",
+      "label": "Scent 5 image"
+    },
+    {
+      "type": "image_picker",
+      "id": "scent_image_6",
+      "label": "Scent 6 image"
+    },
+    {
+      "type": "header",
+      "content": "ADD button — Mobile position"
+    },
+    {
+      "type": "range",
+      "id": "tile_add_bottom",
+      "label": "Mobile — distance from bottom edge",
+      "info": "How far the pill sits above the bottom of each tile image (mobile only).",
+      "min": 0,
+      "max": 80,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "tile_add_offset_x",
+      "label": "Mobile — horizontal offset from centre",
+      "info": "0 = centred. Negative moves left, positive moves right (mobile only).",
+      "min": -40,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "ADD button — Desktop position"
+    },
+    {
+      "type": "range",
+      "id": "tile_add_top_desktop",
+      "label": "Desktop — distance from top edge",
+      "info": "How far the pill sits below the top of each tile image (desktop ≥768px). Pill is 56×20 on desktop.",
+      "min": 0,
+      "max": 240,
+      "step": 4,
+      "unit": "px",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "tile_add_left_desktop",
+      "label": "Desktop — distance from left edge",
+      "info": "How far the pill sits from the left of each tile image (desktop ≥768px).",
+      "min": 0,
+      "max": 240,
+      "step": 4,
+      "unit": "px",
+      "default": 64
+    },
+    {
+      "type": "header",
+      "content": "CTA"
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "CTA label",
+      "default": "Choose Scent"
+    },
+    {
+      "type": "color",
+      "id": "cta_bg_color",
+      "label": "CTA background",
+      "default": "#FFFFFF0A"
+    },
+    {
+      "type": "color",
+      "id": "cta_border_color",
+      "label": "CTA border",
+      "default": "#00000026"
+    },
+    {
+      "type": "range",
+      "id": "cta_padding_y_desktop",
+      "label": "CTA padding — vertical (Desktop)",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "cta_padding_x_desktop",
+      "label": "CTA padding — horizontal (Desktop)",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "cta_padding_y_mobile",
+      "label": "CTA padding — vertical (Mobile)",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "cta_padding_x_mobile",
+      "label": "CTA padding — horizontal (Mobile)",
+      "min": 0,
+      "max": 80,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "card_height",
+      "label": "Card height — Desktop",
+      "info": "Exact height of both the left content panel and the right hero image on desktop (>=768px). Both panels always stay equal. If your content doesn't fit, raise the value.",
+      "min": 320,
+      "max": 900,
+      "step": 10,
+      "unit": "px",
+      "default": 700
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Section background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "side_margin_desktop",
+      "label": "Side margin — Desktop",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "side_margin_mobile",
+      "label": "Side margin — Mobile",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "margin_top_desktop",
+      "label": "Top margin — Desktop",
+      "info": "Negative values pull the section up to overlap.",
+      "min": -200,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_desktop",
+      "label": "Bottom margin — Desktop",
+      "info": "Negative values pull the next section up.",
+      "min": -200,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "margin_top_mobile",
+      "label": "Top margin — Mobile",
+      "min": -200,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_mobile",
+      "label": "Bottom margin — Mobile",
+      "min": -200,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Behaviour"
+    },
+    {
+      "type": "checkbox",
+      "id": "lock_scroll",
+      "label": "Lock page scroll until a scent is chosen",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "advance_duration_ms",
+      "label": "Advance animation duration",
+      "min": 200,
+      "max": 1200,
+      "step": 50,
+      "unit": "ms",
+      "default": 550
+    },
+    {
+      "type": "text",
+      "id": "storage_key",
+      "label": "localStorage key",
+      "info": "Used to persist the selected scent so the next page can show it. Don't change unless you know what this means.",
+      "default": "glozin_selected_scent"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "scent",
+      "name": "Scent option",
+      "limit": 12,
+      "settings": [
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Name",
+          "default": "Coconut Vanilla Sandalwood"
+        },
+        {
+          "type": "image_picker",
+          "id": "tile_image",
+          "label": "Tile image (optional override)",
+          "info": "Falls back to the section's shared tile image if blank."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Scent Selector",
+      "blocks": [
+        { "type": "scent", "settings": { "name": "Coconut Vanilla Sandalwood" } },
+        { "type": "scent", "settings": { "name": "Coconut Vanilla Sandalwood" } },
+        { "type": "scent", "settings": { "name": "Coconut Vanilla Sandalwood" } },
+        { "type": "scent", "settings": { "name": "Coconut Vanilla Sandalwood" } },
+        { "type": "scent", "settings": { "name": "Coconut Vanilla Sandalwood" } },
+        { "type": "scent", "settings": { "name": "Coconut Vanilla Sandalwood" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

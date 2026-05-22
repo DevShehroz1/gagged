@@ -1,0 +1,1116 @@
+{%- liquid
+  assign s = section.settings
+  assign top_collection = collections[s.collection_top]
+  assign bottom_collection = collections[s.collection_bottom]
+  assign atc_text = s.card_button_text | default: 'ADD TO CART'
+-%}
+
+{%- capture render_new_card -%}{%- endcapture -%}
+
+<div class="shop-pair color-{{ s.color_scheme }}" style="background-color: {{ s.bg_color }};">
+  <div class="shop-pair__inner">
+
+    {%- if s.heading != blank -%}
+      <h2 class="shop-pair__heading">{{ s.heading | escape }}</h2>
+    {%- endif -%}
+
+    {%- if top_collection.products.size > 0 -%}
+      <div class="shop-pair__row shop-pair__row--top">
+        {%- comment -%} Desktop: new cutout-card design {%- endcomment -%}
+        <div class="sp-cards-desktop sp-cards-desktop--top">
+          {%- for product in top_collection.products limit: 2 -%}
+            {%- assign sd = product.metafields.custom.short_description | default: product.description | strip_html | truncatewords: 14 -%}
+            <div class="sp-card">
+              <div class="sp-card__media">
+                <a class="sp-card__image" href="{{ product.url }}">
+                  {%- if product.featured_image != blank -%}
+                    {{ product.featured_image | image_url: width: 1000 | image_tag: alt: product.title, loading: 'lazy', sizes: '(min-width: 768px) 50vw, 100vw' }}
+                  {%- endif -%}
+                </a>
+                <a class="sp-card__atc" href="{{ product.url }}" aria-label="{{ atc_text | escape }} — {{ product.title | escape }}">{{ atc_text | escape }}</a>
+              </div>
+              <div class="sp-card__info">
+                <a class="sp-card__title-link" href="{{ product.url }}">
+                  <span class="sp-card__title">{{ product.title | upcase }}</span>
+                </a>
+                {%- if product.price > 0 -%}
+                  <span class="sp-card__price">{{ product.price | money }}</span>
+                {%- endif -%}
+              </div>
+              {%- if sd != blank -%}
+                <p class="sp-card__description">{{ sd | upcase }}</p>
+              {%- endif -%}
+            </div>
+          {%- endfor -%}
+        </div>
+        {%- comment -%} Mobile: existing product-item rendering, unchanged {%- endcomment -%}
+        <div class="sp-cards-mobile sp-cards-mobile--top">
+          {%- for product in top_collection.products limit: 2 -%}
+            {% render 'product-item',
+              card_product: product,
+              section_id: section.id,
+              class: 'shop-pair__card',
+              colunm: 2,
+              colunm_mobile: 2,
+              template_enable_action: true,
+              template_enable_product_vendor: true,
+              template_enable_rate: false,
+              template_enable_product_short_description: true,
+              template_enable_color_swatches: false,
+              template_enable_price: true,
+              template_enable_add_cart: false,
+              template_enable_product_badges: true,
+              indexFor: forloop.index
+            %}
+          {%- endfor -%}
+        </div>
+      </div>
+    {%- endif -%}
+
+    {%- if s.banner_enable -%}
+      <div class="sp-banner" style="background-color: {{ s.banner_bg_color | default: '#1F2330' }};">
+        {%- if s.banner_image_desktop != blank -%}
+          <div class="sp-banner__media sp-banner__media--desktop">
+            {{ s.banner_image_desktop | image_url: width: 2400 | image_tag: alt: s.banner_heading | default: '', loading: 'lazy', sizes: '100vw' }}
+          </div>
+        {%- endif -%}
+        {%- if s.banner_image_mobile != blank -%}
+          <div class="sp-banner__media sp-banner__media--mobile">
+            {{ s.banner_image_mobile | image_url: width: 1200 | image_tag: alt: s.banner_heading | default: '', loading: 'lazy', sizes: '100vw' }}
+          </div>
+        {%- endif -%}
+        <div class="sp-banner__overlay" style="background-color: rgba(0,0,0,{{ s.banner_overlay | default: 25 | divided_by: 100.0 }});"></div>
+        <div class="sp-banner__content" style="color: {{ s.banner_text_color | default: '#FFFFFF' }};">
+          {%- if s.banner_heading != blank -%}
+            <h3 class="sp-banner__heading">{{ s.banner_heading | escape }}</h3>
+          {%- endif -%}
+          {%- if s.banner_subheading != blank -%}
+            <p class="sp-banner__sub">{{ s.banner_subheading | escape }}</p>
+          {%- endif -%}
+          {%- if s.banner_button_text != blank -%}
+            <a class="sp-banner__btn" href="{{ s.banner_button_link | default: '#' }}" style="background-color: {{ s.banner_button_bg | default: '#D8D27A' }}; color: {{ s.banner_button_text_color | default: '#000000' }};">{{ s.banner_button_text | escape }}</a>
+          {%- endif -%}
+        </div>
+      </div>
+    {%- endif -%}
+
+    {%- if bottom_collection.products.size > 0 -%}
+      <div class="shop-pair__row shop-pair__row--bottom">
+        <div class="sp-cards-desktop sp-cards-desktop--bottom">
+          {%- for product in bottom_collection.products limit: 4 -%}
+            {%- assign sd = product.metafields.custom.short_description | default: product.description | strip_html | truncatewords: 14 -%}
+            <div class="sp-card">
+              <div class="sp-card__media">
+                <a class="sp-card__image" href="{{ product.url }}">
+                  {%- if product.featured_image != blank -%}
+                    {{ product.featured_image | image_url: width: 800 | image_tag: alt: product.title, loading: 'lazy', sizes: '(min-width: 768px) 25vw, 100vw' }}
+                  {%- endif -%}
+                </a>
+                <a class="sp-card__atc" href="{{ product.url }}" aria-label="{{ atc_text | escape }} — {{ product.title | escape }}">{{ atc_text | escape }}</a>
+              </div>
+              <div class="sp-card__info">
+                <a class="sp-card__title-link" href="{{ product.url }}">
+                  <span class="sp-card__title">{{ product.title | upcase }}</span>
+                </a>
+                {%- if product.price > 0 -%}
+                  <span class="sp-card__price">{{ product.price | money }}</span>
+                {%- endif -%}
+              </div>
+              {%- if sd != blank -%}
+                <p class="sp-card__description">{{ sd | upcase }}</p>
+              {%- endif -%}
+            </div>
+          {%- endfor -%}
+        </div>
+        <div class="sp-cards-mobile sp-cards-mobile--bottom">
+          {%- for product in bottom_collection.products limit: 4 -%}
+            {% render 'product-item',
+              card_product: product,
+              section_id: section.id,
+              class: 'shop-pair__card',
+              colunm: 4,
+              colunm_mobile: 1,
+              template_enable_action: true,
+              template_enable_product_vendor: true,
+              template_enable_rate: false,
+              template_enable_product_short_description: true,
+              template_enable_color_swatches: false,
+              template_enable_price: true,
+              template_enable_add_cart: false,
+              template_enable_product_badges: true,
+              indexFor: forloop.index
+            %}
+          {%- endfor -%}
+        </div>
+      </div>
+    {%- endif -%}
+
+  </div>
+</div>
+
+{% style %}
+  #shopify-section-{{ section.id }} .shop-pair {
+    width: 100%;
+    margin-top: {{ s.margin_top | default: 0 }}px;
+    margin-bottom: {{ s.margin_bottom | default: 0 }}px;
+  }
+  #shopify-section-{{ section.id }} .shop-pair__inner {
+    max-width: {{ s.content_max_width }}px;
+    margin: 0 auto;
+    padding: {{ s.padding_v }}px {{ s.padding_h }}px;
+    box-sizing: border-box;
+  }
+  #shopify-section-{{ section.id }} .shop-pair__heading {
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    font-size: 28px;
+    line-height: 32px;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    text-align: center;
+    color: {{ s.text_color }};
+    margin: 0 0 30px;
+  }
+  #shopify-section-{{ section.id }} .shop-pair__row {
+    display: grid;
+    gap: {{ s.column_gap }}px;
+    margin-bottom: {{ s.row_gap }}px;
+  }
+  #shopify-section-{{ section.id }} .shop-pair__row:last-child {
+    margin-bottom: 0;
+  }
+  /* Collection 1 (top row) — Figma spec: card 400 × 428, gap 20 */
+  #shopify-section-{{ section.id }} .shop-pair__row--top {
+    grid-template-columns: repeat(2, 400px);
+    gap: 20px;
+    justify-content: center;
+  }
+  #shopify-section-{{ section.id }} .shop-pair__row--top .shop-pair__card {
+    width: 400px;
+    max-width: 400px;
+    height: 428px;
+    overflow: hidden;
+  }
+  #shopify-section-{{ section.id }} .shop-pair__row--top .shop-pair__card .product__media,
+  #shopify-section-{{ section.id }} .shop-pair__row--top .shop-pair__card .product-item__media--ratio {
+    aspect-ratio: 400 / 330 !important;
+    width: 400px !important;
+    max-width: 400px !important;
+    border-radius: 14px !important;
+    overflow: hidden;
+  }
+  #shopify-section-{{ section.id }} .shop-pair__row--top .shop-pair__card .product-item__info,
+  #shopify-section-{{ section.id }} .shop-pair__row--top .shop-pair__card .card-information,
+  #shopify-section-{{ section.id }} .shop-pair__row--top .shop-pair__card .price,
+  #shopify-section-{{ section.id }} .shop-pair__row--top .shop-pair__card .product-item__price,
+  #shopify-section-{{ section.id }} .shop-pair__row--top .shop-pair__card .card-information__price {
+    text-align: center !important;
+    display: block !important;
+  }
+  #shopify-section-{{ section.id }} .shop-pair__row--bottom {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 24px;
+  }
+  #shopify-section-{{ section.id }} .shop-pair__row--bottom .shop-pair__card {
+    width: 100%;
+    max-width: none;
+  }
+  #shopify-section-{{ section.id }} .shop-pair__row--bottom .shop-pair__card .product__media,
+  #shopify-section-{{ section.id }} .shop-pair__row--bottom .shop-pair__card .product-item__media--ratio {
+    aspect-ratio: 320 / 340 !important;
+    max-width: none !important;
+    width: 100% !important;
+    border-radius: 14px !important;
+    overflow: hidden;
+  }
+  #shopify-section-{{ section.id }} .shop-pair__card {
+    min-width: 0;
+  }
+
+  /* Force center alignment across every text node inside both rows */
+  #shopify-section-{{ section.id }} .shop-pair__card,
+  #shopify-section-{{ section.id }} .shop-pair__card * {
+    text-align: center !important;
+  }
+  /* Card content area uses flex column with center-aligned items so price + desc
+     end up horizontally centered even when their wrappers are flex-row internally.
+     The actual class is .product-item__information (NOT .product-item__info). */
+  #shopify-section-{{ section.id }} .shop-pair__card .product-item__information,
+  #shopify-section-{{ section.id }} .shop-pair__card .product-item__inner > :not(.product__media):not(.product-item__media--ratio),
+  #shopify-section-{{ section.id }} .shop-pair__card .card-information,
+  #shopify-section-{{ section.id }} .shop-pair__card .card__content {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    width: 100% !important;
+    text-align: center !important;
+  }
+  /* Defeat the dynamic .justify-content-left / .justify-content-right class
+     that product-item.liquid bakes onto .product-item__price based on the
+     theme's product_alignment setting — we want center inside shop-pair
+     regardless of the global setting. */
+  #shopify-section-{{ section.id }} .shop-pair__card .product-item__price,
+  #shopify-section-{{ section.id }} .shop-pair__card .product-item__price.justify-content-left,
+  #shopify-section-{{ section.id }} .shop-pair__card .product-item__price.justify-content-right,
+  #shopify-section-{{ section.id }} .shop-pair__card .product-item__price.justify-content-center {
+    justify-content: center !important;
+  }
+  #shopify-section-{{ section.id }} .shop-pair__card .product-item__short-description {
+    text-align: center !important;
+    width: 100%;
+  }
+  #shopify-section-{{ section.id }} .shop-pair__card .product-item__name {
+    text-align: center !important;
+    width: 100%;
+  }
+  #shopify-section-{{ section.id }} .shop-pair__card .product-card-information__title,
+  #shopify-section-{{ section.id }} .shop-pair__card .card__heading,
+  #shopify-section-{{ section.id }} .shop-pair__card .card__heading a,
+  #shopify-section-{{ section.id }} .shop-pair__card .product-item .h5,
+  #shopify-section-{{ section.id }} .shop-pair__card .product-item .h6 {
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 400 !important;
+    font-size: 18px !important;
+    line-height: 22px !important;
+    letter-spacing: 0 !important;
+    text-transform: uppercase !important;
+  }
+  #shopify-section-{{ section.id }} .shop-pair__card .product-item__description,
+  #shopify-section-{{ section.id }} .shop-pair__card .product-card__description {
+    display: block !important;
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 400 !important;
+    font-size: 14px !important;
+    line-height: 16px !important;
+    letter-spacing: 0 !important;
+    margin-top: 6px;
+  }
+  #shopify-section-{{ section.id }} .shop-pair__card .price,
+  #shopify-section-{{ section.id }} .shop-pair__card .product-item__price,
+  #shopify-section-{{ section.id }} .shop-pair__card .card-information__price,
+  #shopify-section-{{ section.id }} .shop-pair__card .price__container,
+  #shopify-section-{{ section.id }} .shop-pair__card .price__regular,
+  #shopify-section-{{ section.id }} .shop-pair__card .price__sale {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    text-align: center !important;
+  }
+  /* The price snippet wraps the price in `.card-product-price` which is itself
+     a flex container — center it AND its children so the price text actually
+     lands in the middle of the card. */
+  #shopify-section-{{ section.id }} .shop-pair__card .card-product-price {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    text-align: center !important;
+  }
+  #shopify-section-{{ section.id }} .shop-pair__card .price-regular {
+    display: flex !important;
+    justify-content: center !important;
+    width: auto !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    text-align: center !important;
+  }
+  #shopify-section-{{ section.id }} .shop-pair__card .price-item,
+  #shopify-section-{{ section.id }} .shop-pair__card .price-item--regular,
+  #shopify-section-{{ section.id }} .shop-pair__card .price-item--sale,
+  #shopify-section-{{ section.id }} .shop-pair__card .price-same-style,
+  #shopify-section-{{ section.id }} .shop-pair__card .money {
+    display: inline-block !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    text-align: center !important;
+  }
+
+  /* ── Mobile ── */
+  @media screen and (max-width: 767px) {
+    #shopify-section-{{ section.id }} .shop-pair__inner {
+      padding: {{ s.padding_v_mobile | default: s.padding_v }}px {{ s.padding_h_mobile | default: 12 }}px;
+    }
+    #shopify-section-{{ section.id }} .shop-pair__heading {
+      font-size: 22px;
+      line-height: 26px;
+      margin-bottom: 24px;
+    }
+    #shopify-section-{{ section.id }} .shop-pair__row {
+      /* Mobile-only row gap. Customizer-tunable via the new
+         row_gap_mobile setting. Default 20 sits between the original
+         24 and the previous (too-tight) 8. */
+      margin-bottom: {{ s.row_gap_mobile | default: 20 }}px;
+    }
+    /* Collection 1 mobile — Figma spec: card 157 × 294, gap 16, row centered
+       so left and right margins are equal. */
+    #shopify-section-{{ section.id }} .shop-pair__row--top {
+      grid-template-columns: repeat(2, 157px);
+      gap: 16px;
+      justify-content: center;
+    }
+    #shopify-section-{{ section.id }} .shop-pair__row--top .shop-pair__card {
+      width: 157px;
+      max-width: 157px;
+      /* Reset the desktop \`height: 428px\` and \`overflow: hidden\` that
+         the unscoped base rule leaks into mobile. Without this reset
+         the mobile card stayed 428px tall with content stopping ~280px
+         in — a ~140px empty band below the price that read as a giant
+         gap before collection 2. */
+      height: auto;
+      overflow: visible;
+    }
+    #shopify-section-{{ section.id }} .shop-pair__row--top .shop-pair__card .product__media,
+    #shopify-section-{{ section.id }} .shop-pair__row--top .shop-pair__card .product-item__media--ratio {
+      aspect-ratio: 157 / 200 !important;
+      width: 157px !important;
+      max-width: 157px !important;
+    }
+    /* Bottom row: 200x346 carousel with 16px gap, first card sits inside the
+       inner padding so it has a visible left margin and isn't clipped by the
+       viewport edge. */
+    #shopify-section-{{ section.id }} .shop-pair__row--bottom {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      grid-template-columns: none;
+      gap: 16px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      padding-bottom: 4px;
+      width: 100%;
+      margin-left: 0;
+      margin-right: 0;
+      box-sizing: border-box;
+    }
+    #shopify-section-{{ section.id }} .shop-pair__row--bottom::-webkit-scrollbar {
+      display: none;
+    }
+    #shopify-section-{{ section.id }} .shop-pair__row--bottom .shop-pair__card {
+      flex: 0 0 200px;
+      width: 200px;
+      max-width: 200px;
+      scroll-snap-align: start;
+    }
+    #shopify-section-{{ section.id }} .shop-pair__row--bottom .shop-pair__card .product__media,
+    #shopify-section-{{ section.id }} .shop-pair__row--bottom .shop-pair__card .product-item__media--ratio {
+      aspect-ratio: 200 / 252 !important;
+      max-width: 200px;
+      width: 100%;
+    }
+  }
+
+  /* ── New cutout-card design (desktop only) ───────────────────────── */
+  #shopify-section-{{ section.id }} .sp-cards-desktop {
+    display: none;
+  }
+  #shopify-section-{{ section.id }} .sp-cards-mobile {
+    display: contents;
+  }
+  @media (min-width: 768px) {
+    #shopify-section-{{ section.id }} .sp-cards-mobile {
+      display: none !important;
+    }
+    #shopify-section-{{ section.id }} .sp-cards-desktop {
+      display: grid;
+      grid-template-columns: repeat({{ s.desktop_columns | default: 2 }}, 1fr);
+      gap: {{ s.desktop_card_gap | default: 24 }}px;
+      width: 100%;
+    }
+    #shopify-section-{{ section.id }} .sp-cards-desktop--bottom {
+      grid-template-columns: repeat({{ s.desktop_columns_bottom | default: 2 }}, 1fr);
+    }
+    /* The new card uses an absolutely-positioned ATC button overlapping
+       the bottom-right of the image. The image gets a circular mask cut
+       so the button sits inside a "scoop" — matching the reference. */
+    #shopify-section-{{ section.id }} .sp-card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    }
+    #shopify-section-{{ section.id }} .sp-card__media {
+      position: relative;
+      width: 100%;
+      aspect-ratio: {{ s.card_aspect_ratio | default: '4 / 3' }};
+      overflow: visible;
+    }
+    #shopify-section-{{ section.id }} .sp-card__image {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border-radius: {{ s.card_radius | default: 14 }}px;
+      overflow: hidden;
+      /* Circular cutout in the bottom-right where the ATC button sits.
+         Using -webkit-mask + mask radial-gradient for cross-browser. */
+      -webkit-mask: radial-gradient(circle {{ s.card_atc_cutout_radius | default: 62 }}px at calc(100% - {{ s.card_atc_cutout_offset | default: 6 }}px) calc(100% - {{ s.card_atc_cutout_offset | default: 6 }}px), transparent 99%, #000 100%);
+      mask: radial-gradient(circle {{ s.card_atc_cutout_radius | default: 62 }}px at calc(100% - {{ s.card_atc_cutout_offset | default: 6 }}px) calc(100% - {{ s.card_atc_cutout_offset | default: 6 }}px), transparent 99%, #000 100%);
+    }
+    #shopify-section-{{ section.id }} .sp-card__image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    #shopify-section-{{ section.id }} .sp-card__atc {
+      position: absolute;
+      bottom: 14px;
+      right: 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 9px 18px;
+      border-radius: 999px;
+      background-color: {{ s.card_button_bg | default: '#BFCED6' }};
+      color: {{ s.card_button_text_color | default: '#000000' }};
+      font-family: 'Inter', sans-serif;
+      font-size: {{ s.card_button_size | default: 11 }}px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      z-index: 2;
+    }
+    #shopify-section-{{ section.id }} .sp-card__atc:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+    }
+    #shopify-section-{{ section.id }} .sp-card__info {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 14px 0 0;
+    }
+    #shopify-section-{{ section.id }} .sp-card__title-link {
+      text-decoration: none;
+      color: {{ s.text_color | default: '#000000' }};
+      flex: 1;
+      min-width: 0;
+    }
+    #shopify-section-{{ section.id }} .sp-card__title {
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: inherit;
+    }
+    #shopify-section-{{ section.id }} .sp-card__price {
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      font-size: 14px;
+      color: {{ s.text_color | default: '#000000' }};
+      white-space: nowrap;
+    }
+    #shopify-section-{{ section.id }} .sp-card__description {
+      margin: 6px 0 0;
+      font-family: 'Inter', sans-serif;
+      font-weight: 400;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      line-height: 1.4;
+      text-transform: uppercase;
+      color: {{ s.text_color | default: '#000000' }};
+      opacity: 0.7;
+    }
+  }
+
+  /* ── Middle banner — separate desktop & mobile images ──────────── */
+  #shopify-section-{{ section.id }} .sp-banner {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    border-radius: {{ s.banner_radius | default: 16 }}px;
+    margin: {{ s.banner_margin_v | default: 28 }}px 0;
+    min-height: {{ s.banner_height_desktop | default: 280 }}px;
+    display: flex;
+    align-items: center;
+    justify-content: {{ s.banner_align | default: 'center' }};
+  }
+  #shopify-section-{{ section.id }} .sp-banner__media {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+  #shopify-section-{{ section.id }} .sp-banner__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  #shopify-section-{{ section.id }} .sp-banner__media--mobile { display: none; }
+  #shopify-section-{{ section.id }} .sp-banner__overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
+  #shopify-section-{{ section.id }} .sp-banner__content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding: {{ s.banner_padding_v_desktop | default: 56 }}px {{ s.banner_padding_h_desktop | default: 32 }}px;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  #shopify-section-{{ section.id }} .sp-banner__heading {
+    margin: 0 0 12px;
+    font-family: 'Inter', sans-serif;
+    font-size: {{ s.banner_heading_size_desktop | default: 32 }}px;
+    line-height: 1.15;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  #shopify-section-{{ section.id }} .sp-banner__sub {
+    margin: 0 0 24px;
+    font-family: 'Inter', sans-serif;
+    font-size: {{ s.banner_sub_size_desktop | default: 14 }}px;
+    line-height: 1.5;
+    opacity: 0.92;
+  }
+  #shopify-section-{{ section.id }} .sp-banner__btn {
+    display: inline-block;
+    padding: 13px 28px;
+    border-radius: 999px;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  #shopify-section-{{ section.id }} .sp-banner__btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.22);
+  }
+  @media (max-width: 767px) {
+    #shopify-section-{{ section.id }} .sp-banner {
+      min-height: {{ s.banner_height_mobile | default: 240 }}px;
+      border-radius: {{ s.banner_radius_mobile | default: 14 }}px;
+      margin: {{ s.banner_margin_v_mobile | default: 20 }}px 0;
+    }
+    #shopify-section-{{ section.id }} .sp-banner__media--desktop { display: none; }
+    #shopify-section-{{ section.id }} .sp-banner__media--mobile { display: block; }
+    #shopify-section-{{ section.id }} .sp-banner__content {
+      padding: {{ s.banner_padding_v_mobile | default: 36 }}px {{ s.banner_padding_h_mobile | default: 20 }}px;
+    }
+    #shopify-section-{{ section.id }} .sp-banner__heading {
+      font-size: {{ s.banner_heading_size_mobile | default: 22 }}px;
+    }
+    #shopify-section-{{ section.id }} .sp-banner__sub {
+      font-size: {{ s.banner_sub_size_mobile | default: 13 }}px;
+      margin-bottom: 20px;
+    }
+  }
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "Shop Pair",
+  "tag": "section",
+  "disabled_on": {
+    "groups": ["header", "footer", "custom.overlay"]
+  },
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Heading color",
+      "default": "#111111"
+    },
+    {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading text",
+      "default": "Shop Summr"
+    },
+    {
+      "type": "header",
+      "content": "Top row (2 products)"
+    },
+    {
+      "type": "collection",
+      "id": "collection_top",
+      "label": "Top collection"
+    },
+    {
+      "type": "header",
+      "content": "Bottom row (4 products)"
+    },
+    {
+      "type": "collection",
+      "id": "collection_bottom",
+      "label": "Bottom collection",
+      "info": "Renders as a horizontal carousel on mobile."
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "content_max_width",
+      "label": "Max content width",
+      "default": 1500,
+      "min": 800,
+      "max": 1800,
+      "step": 20,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_v",
+      "label": "Vertical padding (desktop)",
+      "default": 60,
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_h",
+      "label": "Horizontal padding (desktop)",
+      "default": 12,
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_v_mobile",
+      "label": "Vertical padding (mobile)",
+      "default": 40,
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_h_mobile",
+      "label": "Horizontal padding (mobile)",
+      "default": 12,
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "column_gap",
+      "label": "Gap between products",
+      "default": 30,
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "row_gap",
+      "label": "Gap between rows (desktop)",
+      "default": 60,
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "row_gap_mobile",
+      "label": "Gap between rows (mobile ≤767px)",
+      "default": 20,
+      "min": 0,
+      "max": 80,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Section margin"
+    },
+    {
+      "type": "range",
+      "id": "margin_top",
+      "label": "Margin top",
+      "default": 0,
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom",
+      "label": "Margin bottom",
+      "default": 0,
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Desktop card design (new cutout cards)"
+    },
+    {
+      "type": "select",
+      "id": "desktop_columns",
+      "label": "Top row columns (desktop)",
+      "options": [
+        { "value": "1", "label": "1" },
+        { "value": "2", "label": "2" },
+        { "value": "3", "label": "3" },
+        { "value": "4", "label": "4" }
+      ],
+      "default": "2"
+    },
+    {
+      "type": "select",
+      "id": "desktop_columns_bottom",
+      "label": "Bottom row columns (desktop)",
+      "options": [
+        { "value": "1", "label": "1" },
+        { "value": "2", "label": "2" },
+        { "value": "3", "label": "3" },
+        { "value": "4", "label": "4" }
+      ],
+      "default": "2"
+    },
+    {
+      "type": "range",
+      "id": "desktop_card_gap",
+      "label": "Gap between cards (desktop)",
+      "min": 0,
+      "max": 80,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "select",
+      "id": "card_aspect_ratio",
+      "label": "Card image aspect ratio",
+      "options": [
+        { "value": "1 / 1",  "label": "1:1 square" },
+        { "value": "4 / 3",  "label": "4:3" },
+        { "value": "3 / 2",  "label": "3:2" },
+        { "value": "16 / 9", "label": "16:9" },
+        { "value": "5 / 6",  "label": "5:6 portrait" }
+      ],
+      "default": "4 / 3"
+    },
+    {
+      "type": "range",
+      "id": "card_radius",
+      "label": "Card image radius",
+      "min": 0,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "card_atc_cutout_radius",
+      "label": "ATC cutout radius",
+      "info": "Size of the circular notch in the bottom-right corner where the ADD TO CART button sits.",
+      "min": 30,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "default": 62
+    },
+    {
+      "type": "range",
+      "id": "card_atc_cutout_offset",
+      "label": "ATC cutout offset",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "default": 6
+    },
+    {
+      "type": "text",
+      "id": "card_button_text",
+      "label": "ATC button text",
+      "default": "ADD TO CART"
+    },
+    {
+      "type": "color",
+      "id": "card_button_bg",
+      "label": "ATC button background",
+      "default": "#BFCED6"
+    },
+    {
+      "type": "color",
+      "id": "card_button_text_color",
+      "label": "ATC button text color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "card_button_size",
+      "label": "ATC button text size",
+      "min": 8,
+      "max": 16,
+      "step": 1,
+      "unit": "px",
+      "default": 11
+    },
+    {
+      "type": "header",
+      "content": "Middle banner (between rows)"
+    },
+    {
+      "type": "checkbox",
+      "id": "banner_enable",
+      "label": "Show middle banner",
+      "default": false
+    },
+    {
+      "type": "image_picker",
+      "id": "banner_image_desktop",
+      "label": "Banner image (desktop)"
+    },
+    {
+      "type": "image_picker",
+      "id": "banner_image_mobile",
+      "label": "Banner image (mobile)"
+    },
+    {
+      "type": "color",
+      "id": "banner_bg_color",
+      "label": "Banner background (fallback if no image)",
+      "default": "#1F2330"
+    },
+    {
+      "type": "color",
+      "id": "banner_text_color",
+      "label": "Banner text color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "range",
+      "id": "banner_overlay",
+      "label": "Image overlay intensity (%)",
+      "min": 0,
+      "max": 90,
+      "step": 5,
+      "unit": "%",
+      "default": 25
+    },
+    {
+      "type": "text",
+      "id": "banner_heading",
+      "label": "Banner heading",
+      "default": "BUILD YOUR OWN STARTER PACK."
+    },
+    {
+      "type": "textarea",
+      "id": "banner_subheading",
+      "label": "Banner subheading",
+      "default": "Choose your case and fill it with the scents you actually want to wear. Swap them out whenever. Build it around your mood, your week, your skin."
+    },
+    {
+      "type": "text",
+      "id": "banner_button_text",
+      "label": "Banner button text",
+      "default": "START YOUR SUMMR"
+    },
+    {
+      "type": "url",
+      "id": "banner_button_link",
+      "label": "Banner button link"
+    },
+    {
+      "type": "color",
+      "id": "banner_button_bg",
+      "label": "Banner button background",
+      "default": "#D8D27A"
+    },
+    {
+      "type": "color",
+      "id": "banner_button_text_color",
+      "label": "Banner button text color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "banner_radius",
+      "label": "Banner radius (desktop)",
+      "min": 0,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "banner_radius_mobile",
+      "label": "Banner radius (mobile)",
+      "min": 0,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "banner_height_desktop",
+      "label": "Banner min height (desktop)",
+      "min": 160,
+      "max": 600,
+      "step": 10,
+      "unit": "px",
+      "default": 280
+    },
+    {
+      "type": "range",
+      "id": "banner_height_mobile",
+      "label": "Banner min height (mobile)",
+      "min": 120,
+      "max": 500,
+      "step": 10,
+      "unit": "px",
+      "default": 240
+    },
+    {
+      "type": "range",
+      "id": "banner_padding_v_desktop",
+      "label": "Banner padding top/bottom (desktop)",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 56
+    },
+    {
+      "type": "range",
+      "id": "banner_padding_h_desktop",
+      "label": "Banner padding left/right (desktop)",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "banner_padding_v_mobile",
+      "label": "Banner padding top/bottom (mobile)",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "banner_padding_h_mobile",
+      "label": "Banner padding left/right (mobile)",
+      "min": 0,
+      "max": 80,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "banner_heading_size_desktop",
+      "label": "Banner heading size (desktop)",
+      "min": 16,
+      "max": 56,
+      "step": 1,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "banner_heading_size_mobile",
+      "label": "Banner heading size (mobile)",
+      "min": 14,
+      "max": 36,
+      "step": 1,
+      "unit": "px",
+      "default": 22
+    },
+    {
+      "type": "range",
+      "id": "banner_sub_size_desktop",
+      "label": "Banner subheading size (desktop)",
+      "min": 11,
+      "max": 22,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "banner_sub_size_mobile",
+      "label": "Banner subheading size (mobile)",
+      "min": 10,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "default": 13
+    },
+    {
+      "type": "range",
+      "id": "banner_margin_v",
+      "label": "Banner space above/below rows (desktop)",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "default": 28
+    },
+    {
+      "type": "range",
+      "id": "banner_margin_v_mobile",
+      "label": "Banner space above/below rows (mobile)",
+      "min": 0,
+      "max": 80,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    }
+  ],
+  "presets": [
+    {
+      "name": "Shop Pair"
+    }
+  ]
+}
+{% endschema %}

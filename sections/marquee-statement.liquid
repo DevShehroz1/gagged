@@ -1,0 +1,212 @@
+{%- liquid
+  assign sec_st = section.settings
+-%}
+{%- liquid
+  assign mt_mobile = sec_st.margin_top_mobile
+  if mt_mobile == 0
+    assign mt_mobile = sec_st.margin_top
+  endif
+  assign mb_mobile = sec_st.margin_bottom_mobile
+  if mb_mobile == 0
+    assign mb_mobile = sec_st.margin_bottom
+  endif
+-%}
+{% style %}
+  #shopify-section-{{ section.id }} {
+    margin-top: {{ sec_st.margin_top | default: 0 }}px !important;
+    margin-bottom: {{ sec_st.margin_bottom | default: 0 }}px !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding: 0 !important;
+    display: block;
+  }
+  @media (max-width: 767.98px) {
+    #shopify-section-{{ section.id }} {
+      margin-top: {{ mt_mobile | default: 0 }}px !important;
+      margin-bottom: {{ mb_mobile | default: 0 }}px !important;
+    }
+  }
+{% endstyle %}
+<style>
+  #marquee-statement-{{ section.id }} .ms__wrap {
+    width: 100%;
+    overflow: hidden;
+    height: {{ sec_st.section_height | default: 160 }}px;
+    display: flex;
+    align-items: center;
+    background-color: {{ sec_st.bg_color }};
+  }
+  #marquee-statement-{{ section.id }} .ms__track {
+    display: flex;
+    width: max-content;
+    animation: ms-scroll-{{ section.id }} {{ sec_st.speed | default: 30 }}s linear infinite;
+  }
+  #marquee-statement-{{ section.id }} .ms__text {
+    white-space: nowrap;
+    font-family: 'Inter', var(--body-font), sans-serif;
+    font-weight: 400;
+    font-size: {{ sec_st.font_size | default: 160 }}px;
+    line-height: {{ sec_st.font_size | default: 160 }}px;
+    letter-spacing: -0.02em;
+    color: {{ sec_st.text_color }};
+    padding-right: 120px;
+  }
+  @keyframes ms-scroll-{{ section.id }} {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  @media (max-width: 767.98px) {
+    #marquee-statement-{{ section.id }} .ms__wrap {
+      height: {{ sec_st.section_height_mobile | default: 80 }}px;
+    }
+    #marquee-statement-{{ section.id }} .ms__text {
+      font-size: {{ sec_st.font_size_mobile | default: 42 }}px;
+      line-height: {{ sec_st.font_size_mobile | default: 42 }}px;
+      padding-right: 60px;
+    }
+  }
+</style>
+
+<div id="marquee-statement-{{ section.id }}">
+  <div class="ms__wrap">
+    <div class="ms__track">
+      <span class="ms__text">{{ sec_st.text | escape }}</span>
+      <span class="ms__text">{{ sec_st.text | escape }}</span>
+      <span class="ms__text">{{ sec_st.text | escape }}</span>
+      <span class="ms__text" aria-hidden="true">{{ sec_st.text | escape }}</span>
+      <span class="ms__text" aria-hidden="true">{{ sec_st.text | escape }}</span>
+      <span class="ms__text" aria-hidden="true">{{ sec_st.text | escape }}</span>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Marquee Statement",
+  "tag": "section",
+  "disabled_on": {
+    "groups": ["header", "footer", "custom.overlay"]
+  },
+  "settings": [
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#111111"
+    },
+    {
+      "type": "text",
+      "id": "text",
+      "label": "Text",
+      "default": "Built for heat. Built for movement."
+    },
+    {
+      "type": "range",
+      "id": "font_size",
+      "label": "Font size (desktop)",
+      "default": 160,
+      "min": 40,
+      "max": 200,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "font_size_mobile",
+      "label": "Font size (mobile)",
+      "default": 42,
+      "min": 24,
+      "max": 80,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "section_height",
+      "label": "Section height (desktop)",
+      "default": 160,
+      "min": 80,
+      "max": 400,
+      "step": 10,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "section_height_mobile",
+      "label": "Section height (mobile)",
+      "default": 80,
+      "min": 60,
+      "max": 200,
+      "step": 10,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "speed",
+      "label": "Scroll speed (seconds)",
+      "default": 30,
+      "min": 5,
+      "max": 120,
+      "step": 5,
+      "info": "Lower = faster. Higher = slower."
+    },
+    {
+      "type": "header",
+      "content": "Margins"
+    },
+    {
+      "type": "range",
+      "id": "margin_top",
+      "label": "Margin top (desktop)",
+      "default": 0,
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom",
+      "label": "Margin bottom (desktop)",
+      "default": 0,
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "margin_top_mobile",
+      "label": "Margin top (mobile)",
+      "info": "Falls back to the desktop value when 0.",
+      "default": 0,
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_mobile",
+      "label": "Margin bottom (mobile)",
+      "info": "Falls back to the desktop value when 0.",
+      "default": 0,
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "unit": "px"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Marquee Statement"
+    }
+  ]
+}
+{% endschema %}

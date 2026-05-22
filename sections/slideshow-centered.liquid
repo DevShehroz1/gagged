@@ -1,47 +1,67 @@
 {{ 'banner.css' | asset_url | stylesheet_tag }}
 <link rel="stylesheet" href="{{ 'slideshow.css' | asset_url }}" media="print" onload="this.media='all'">
 <style>
-  /* Slideshow hero covers the ENTIRE viewport on every screen size.
-     Scoped to this section only so other banners using .h-full_screen
-     keep their original "viewport minus header" behavior. Uses 100dvh
-     with a 100vh fallback for browsers without dvh support. */
-  #shopify-section-{{ section.id }} .h-full_screen,
-  #shopify-section-{{ section.id }}.stretch_width .h-full_screen,
-  #shopify-section-{{ section.id }} .stretch_width .h-full_screen {
-    min-height: 100vh;
-    min-height: 100dvh;
+  .slideshow-centered .sec__content-heading {
+    font-family: 'Inter', var(--heading-font), sans-serif !important;
+    text-align: center !important;
   }
-  .slideshow .sec__content-heading {
-    display: none !important;
+  .slideshow-centered .sec__content-subheading {
+    font-family: 'Inter', var(--heading-font), sans-serif !important;
+    text-align: center !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.04em !important;
   }
-  .slideshow .sec__content-des {
+  .slideshow-centered .sec__content {
+    text-align: center !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    left: 0 !important;
+    right: 0 !important;
+  }
+  .slideshow-centered .sec__content-inner {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    text-align: center !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  .slideshow-centered .sec__content-inner > * {
+    width: 100% !important;
+    text-align: center !important;
+  }
+  .slideshow-centered .sec__content-des {
     font-family: 'Inter', var(--body-font), sans-serif !important;
     font-weight: 400 !important;
     font-style: normal !important;
-    font-size: 26px !important;
-    line-height: 28px !important;
+    font-size: 16px !important;
+    line-height: 22px !important;
     letter-spacing: 0 !important;
+    text-align: center !important;
+    max-width: 640px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
   }
-  /* iOS 26 "Liquid Glass" CTA — layered backgrounds carry the glass optics
-     so the button text stays crisp on top without needing pseudo z-index gymnastics. */
-  .slideshow .sec__content-btn .btn-primary,
-  .slideshow .sec__content-btn .btn-outline {
+  .slideshow-centered .sec__content-btn {
+    justify-content: center !important;
+  }
+  .slideshow-centered .sec__content-btn .btn-primary,
+  .slideshow-centered .sec__content-btn .btn-outline {
     position: relative !important;
-    background:
-      /* top-edge specular "light catch" */
-      radial-gradient(130% 60% at 50% -10%, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0) 55%),
-      /* faint cool chromatic dispersion hint at the bottom */
-      radial-gradient(140% 90% at 50% 115%, rgba(210, 222, 255, 0.22) 0%, rgba(210, 222, 255, 0) 55%),
-      /* diagonal gloss sweep */
-      linear-gradient(108deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0) 38%, rgba(255, 255, 255, 0) 62%, rgba(255, 255, 255, 0.10) 100%),
-      /* base translucent fill that the backdrop blur sits behind */
-      rgba(255, 255, 255, 0.08) !important;
-    -webkit-backdrop-filter: blur(34px) saturate(180%) contrast(1.12) !important;
-    backdrop-filter: blur(34px) saturate(180%) contrast(1.12) !important;
-    border: 1px solid rgba(255, 255, 255, 0.32) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    backdrop-filter: blur(28px) saturate(200%) brightness(1.08) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(200%) brightness(1.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.35) !important;
     color: #fff !important;
     border-radius: 999px !important;
-    padding: 18px 44px !important;
+    padding: 16px 40px !important;
     font-family: 'Inter', var(--heading-font), sans-serif !important;
     font-size: 12px !important;
     font-weight: 500 !important;
@@ -49,124 +69,32 @@
     letter-spacing: 0.96px !important;
     text-transform: uppercase !important;
     text-align: center !important;
-    white-space: nowrap !important;
     box-shadow:
-      /* bright inner top rim — the signature Liquid Glass highlight */
-      inset 0 1.5px 0.5px rgba(255, 255, 255, 0.70),
-      /* softer inner side light */
-      inset 1px 0 1px rgba(255, 255, 255, 0.14),
-      inset -1px 0 1px rgba(255, 255, 255, 0.14),
-      /* inner bottom depth darken — gives the glass "thickness" */
-      inset 0 -1px 0.5px rgba(0, 0, 0, 0.18),
-      /* ambient tight shadow */
-      0 1px 2px rgba(0, 0, 0, 0.14),
-      /* soft floating elevation */
-      0 18px 44px -10px rgba(0, 0, 0, 0.38) !important;
-    transition: background 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-                border-color 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-                box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-                transform 0.35s cubic-bezier(0.22, 1, 0.36, 1) !important;
+      inset 0 1px 1px rgba(255, 255, 255, 0.6),
+      inset 0 -1px 1px rgba(255, 255, 255, 0.15),
+      0 1px 2px rgba(0, 0, 0, 0.04),
+      0 8px 24px rgba(0, 0, 0, 0.12) !important;
+    transition: all 0.3s ease !important;
     overflow: hidden !important;
-    isolation: isolate !important;
   }
-  .slideshow .sec__content-btn .btn-primary:hover,
-  .slideshow .sec__content-btn .btn-outline:hover {
-    background:
-      radial-gradient(130% 65% at 50% -10%, rgba(255, 255, 255, 0.65) 0%, rgba(255, 255, 255, 0) 55%),
-      radial-gradient(140% 90% at 50% 115%, rgba(225, 235, 255, 0.28) 0%, rgba(225, 235, 255, 0) 55%),
-      linear-gradient(108deg, rgba(255, 255, 255, 0.20) 0%, rgba(255, 255, 255, 0) 38%, rgba(255, 255, 255, 0) 62%, rgba(255, 255, 255, 0.14) 100%),
-      rgba(255, 255, 255, 0.14) !important;
-    border-color: rgba(255, 255, 255, 0.48) !important;
-    transform: translateY(-1px) !important;
+  .slideshow-centered .sec__content-btn .btn-primary::before,
+  .slideshow-centered .sec__content-btn .btn-outline::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0) 40%, rgba(255, 255, 255, 0) 60%, rgba(255, 255, 255, 0.1) 100%);
+    pointer-events: none;
+  }
+  .slideshow-centered .sec__content-btn .btn-primary:hover,
+  .slideshow-centered .sec__content-btn .btn-outline:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(255, 255, 255, 0.5) !important;
     box-shadow:
-      inset 0 1.5px 0.5px rgba(255, 255, 255, 0.85),
-      inset 1px 0 1px rgba(255, 255, 255, 0.18),
-      inset -1px 0 1px rgba(255, 255, 255, 0.18),
-      inset 0 -1px 0.5px rgba(0, 0, 0, 0.22),
-      0 2px 6px rgba(0, 0, 0, 0.16),
-      0 24px 54px -12px rgba(0, 0, 0, 0.48) !important;
-  }
-  .slideshow .sec__content-btn .btn-primary:active,
-  .slideshow .sec__content-btn .btn-outline:active {
-    transform: translateY(0) !important;
-    box-shadow:
-      inset 0 1.5px 0.5px rgba(255, 255, 255, 0.55),
-      inset 1px 0 1px rgba(255, 255, 255, 0.12),
-      inset -1px 0 1px rgba(255, 255, 255, 0.12),
-      inset 0 -1px 0.5px rgba(0, 0, 0, 0.18),
-      0 1px 2px rgba(0, 0, 0, 0.14),
-      0 10px 26px -8px rgba(0, 0, 0, 0.32) !important;
-    transition: transform 0.18s ease, box-shadow 0.18s ease !important;
-  }
-  /* Graceful fallback when backdrop-filter isn't supported — slightly more opaque
-     fill so the button still reads clearly without the blur. */
-  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-    .slideshow .sec__content-btn .btn-primary,
-    .slideshow .sec__content-btn .btn-outline {
-      background: rgba(255, 255, 255, 0.22) !important;
-    }
-  }
-  /* Mobile CTA — iOS Liquid Glass / glassmorphism per the Figma spec
-     and the user's reference. 130×32 with 42px radius, black text in
-     Clash Display Variable 500 (10/12, 0.96 ls, uppercase, centered).
-     Glass optics: layered gradients + backdrop-filter blur+saturate
-     for the frosted look, inset highlights for the "glass thickness"
-     feel, soft drop shadow for the floating-pill elevation. */
-  @media (max-width: 640px) {
-    .slideshow .sec__content-btn .btn-primary,
-    .slideshow .sec__content-btn .btn-outline {
-      width: 130px !important;
-      height: 32px !important;
-      padding: 0 !important;
-      border-radius: 42px !important;
-      border: 1px solid rgba(255, 255, 255, 0.32) !important;
-      box-sizing: border-box !important;
-      color: #000 !important;
-      font-family: 'Inter', var(--heading-font), sans-serif !important;
-      font-weight: 500 !important;
-      font-size: 10px !important;
-      line-height: 12px !important;
-      letter-spacing: 0.96px !important;
-      text-transform: uppercase !important;
-      text-align: center !important;
-      /* Layered backgrounds: top specular highlight, faint chromatic
-         dispersion at bottom, diagonal gloss sweep, base translucent
-         fill that sits behind the backdrop blur. */
-      background:
-        radial-gradient(130% 60% at 50% -10%, rgba(255, 255, 255, 0.65) 0%, rgba(255, 255, 255, 0) 55%),
-        radial-gradient(140% 90% at 50% 115%, rgba(210, 222, 255, 0.22) 0%, rgba(210, 222, 255, 0) 55%),
-        linear-gradient(108deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0) 38%, rgba(255, 255, 255, 0) 62%, rgba(255, 255, 255, 0.12) 100%),
-        rgba(255, 255, 255, 0.10) !important;
-      -webkit-backdrop-filter: blur(28px) saturate(180%) contrast(1.12) !important;
-      backdrop-filter: blur(28px) saturate(180%) contrast(1.12) !important;
-      box-shadow:
-        /* bright inner top rim — the signature Liquid Glass highlight */
-        inset 0 1.5px 0.5px rgba(255, 255, 255, 0.70),
-        /* softer inner side light */
-        inset 1px 0 1px rgba(255, 255, 255, 0.14),
-        inset -1px 0 1px rgba(255, 255, 255, 0.14),
-        /* inner bottom depth — gives the glass "thickness" */
-        inset 0 -1px 0.5px rgba(0, 0, 0, 0.18),
-        /* ambient tight shadow */
-        0 1px 2px rgba(0, 0, 0, 0.14),
-        /* soft floating elevation */
-        0 14px 32px -8px rgba(0, 0, 0, 0.32) !important;
-      overflow: hidden !important;
-      isolation: isolate !important;
-    }
-    .slideshow .sec__content-btn .btn-primary:hover,
-    .slideshow .sec__content-btn .btn-outline:hover {
-      transform: none !important;
-      color: #000 !important;
-    }
-    /* Fallback when backdrop-filter isn't supported — slightly more
-       opaque fill so the button still reads as a frosted pill. */
-    @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-      .slideshow .sec__content-btn .btn-primary,
-      .slideshow .sec__content-btn .btn-outline {
-        background: rgba(255, 255, 255, 0.28) !important;
-      }
-    }
+      inset 0 1px 1px rgba(255, 255, 255, 0.7),
+      inset 0 -1px 1px rgba(255, 255, 255, 0.2),
+      0 1px 2px rgba(0, 0, 0, 0.06),
+      0 12px 32px rgba(0, 0, 0, 0.16) !important;
   }
 </style>
 {% liquid
@@ -188,15 +116,9 @@
   --height: {{ section_st.mobile_height }}px;--height-desktop: {{ section_st.desktop_height }}px;
   {% endif %}
 {%- endcapture -%}
-<style>
-  #{{ section.id }} { padding-left: {{ section_st.side_margin_desktop | default: 0 }}px; padding-right: {{ section_st.side_margin_desktop | default: 0 }}px; }
-  @media (max-width: 640px) {
-    #{{ section.id }} { padding-left: {{ section_st.side_margin_mobile | default: 0 }}px; padding-right: {{ section_st.side_margin_mobile | default: 0 }}px; }
-  }
-</style>
 <div
   id="{{ section.id }}"
-  class="section{% if section_st.padding_top < 30 %} pt-min{% endif %}{% if section_st.padding_bottom < 30 %} pb-min{% endif %} gradient slideshow color-{{ color_scheme }}{{ reset_spacing }}"
+  class="section{% if section_st.padding_top < 30 %} pt-min{% endif %}{% if section_st.padding_bottom < 30 %} pb-min{% endif %} gradient slideshow slideshow-centered color-{{ color_scheme }}{{ reset_spacing }}"
   style="{{ style | strip | strip_newlines }}"
   data-id="{{ section.id }}"
 >
@@ -248,20 +170,7 @@
                 assign lazy_load = true
               endif
             %}
-            <style>
-              #slide-{{ block.id }} .banner__media {
-                left: {{ block.settings.slide_side_margin_desktop | default: 0 }}px !important;
-                right: {{ block.settings.slide_side_margin_desktop | default: 0 }}px !important;
-                width: auto !important;
-              }
-              @media (max-width: 640px) {
-                #slide-{{ block.id }} .banner__media {
-                  left: {{ block.settings.slide_side_margin_mobile | default: 0 }}px !important;
-                  right: {{ block.settings.slide_side_margin_mobile | default: 0 }}px !important;
-                }
-              }
-            </style>
-            <div id="slide-{{ block.id }}" {{ block.shopify_attributes }} class="swiper-slide">
+            <div {{ block.shopify_attributes }} class="swiper-slide">
               <div
                 class="sec__inner flex relative{% if section_st.content_below_image %} flex-column flex-md-row text-below-mb{% endif %}{% if slide_height == 'adapt' and image_mobile != blank %} ratio-mobile{% endif %} h-{{ slide_height }}"
                 style="--overlay-opacity: {{ block_st.overlay_opacity }}%;{% if slide_height == 'adapt' or  slide_height == 'full_screen' %}--aspect-ratio: {{ ratio_dk }};--aspect-ratio-mb: {{ ratio_mb }};{% endif %}"
@@ -270,19 +179,7 @@
                   class="banner__media w-full overlay-bg{% if section_st.section_width != "full_width" %} rounded{% endif %}{% if section_st.content_below_image %} absolute-md mb-40 mb-md-0{% else %} absolute{% endif %} inset-0{% if slide_height == 'adapt' and image_mobile != blank %} ratio-mobile{% endif %}{% if slide_height == 'full_screen' %} h-{{ slide_height }}{% endif %}"
                   style="--aspect-ratio: {{ ratio_dk }};--aspect-ratio-mb: {{ ratio_mb }};--point:{{ image.presentation.focal_point }};"
                 >
-                  {%- if block.settings.video_url != blank -%}
-                    <video
-                      class="absolute inset-0 w-full h-full"
-                      autoplay
-                      muted
-                      loop
-                      playsinline
-                      style="object-fit:cover;display:block;"
-                      {%- if image != blank %} poster="{{ image | image_url: width: 1400 }}"{% endif -%}
-                    >
-                      <source src="{{ block.settings.video_url }}" type="video/mp4">
-                    </video>
-                  {%- elsif image != blank or image_mobile != blank -%}
+                  {%- if image != blank or image_mobile != blank -%}
                     {%- liquid
                       if block.settings.image.alt == blank
                         assign image_alt = block.settings.heading
@@ -395,7 +292,7 @@
 
 {% schema %}
 {
-  "name": "t:sections.slideshow.name",
+  "name": "Slideshow Centered",
   "tag": "section",
   "disabled_on": {
     "groups": ["header", "footer", "custom.overlay"]
@@ -722,30 +619,6 @@
       "id": "reset_spacing",
       "label": "t:sections.all.section_padding.reset_spacing.label",
       "default": false
-    },
-    {
-      "type": "header",
-      "content": "Side margins"
-    },
-    {
-      "type": "range",
-      "id": "side_margin_desktop",
-      "label": "Side margin – Desktop (px)",
-      "min": 0,
-      "max": 200,
-      "step": 4,
-      "default": 0,
-      "unit": "px"
-    },
-    {
-      "type": "range",
-      "id": "side_margin_mobile",
-      "label": "Side margin – Mobile (px)",
-      "min": 0,
-      "max": 80,
-      "step": 4,
-      "default": 0,
-      "unit": "px"
     }
   ],
   "blocks": [
@@ -779,40 +652,6 @@
           "unit": "%",
           "label": "t:sections.all.image.image_overlay_opacity.label",
           "default": 0
-        },
-        {
-          "type": "header",
-          "content": "Background video"
-        },
-        {
-          "type": "url",
-          "id": "video_url",
-          "label": "Video URL (.mp4)",
-          "info": "Paste a direct .mp4 URL. Plays automatically, muted and looping. Overrides the image when set."
-        },
-        {
-          "type": "header",
-          "content": "Slide side margins"
-        },
-        {
-          "type": "range",
-          "id": "slide_side_margin_desktop",
-          "label": "Side margin – Desktop (px)",
-          "min": -200,
-          "max": 200,
-          "step": 4,
-          "default": 0,
-          "unit": "px"
-        },
-        {
-          "type": "range",
-          "id": "slide_side_margin_mobile",
-          "label": "Side margin – Mobile (px)",
-          "min": -80,
-          "max": 80,
-          "step": 4,
-          "default": 0,
-          "unit": "px"
         },
         {
           "type": "header",
@@ -1071,7 +910,7 @@
   ],
   "presets": [
     {
-      "name": "t:sections.slideshow.name",
+      "name": "Slideshow Centered",
       "category": "Image",
       "blocks": [
         {

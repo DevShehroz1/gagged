@@ -1,0 +1,493 @@
+{%- liquid
+  assign st = section.settings
+-%}
+
+<style>
+  #mrf-{{ section.id }} {
+    background: {{ st.bg_color | default: '#ffffff' }};
+    padding-top: {{ st.padding_top | default: 80 }}px;
+    padding-bottom: {{ st.padding_bottom | default: 80 }}px;
+    margin-top: {{ st.margin_top_desktop | default: 0 }}px;
+    margin-bottom: {{ st.margin_bottom_desktop | default: 0 }}px;
+  }
+  #mrf-{{ section.id }} .mrf__inner {
+    max-width: {{ st.max_width | default: 1200 }}px;
+    margin: 0 auto;
+    padding: 0 {{ st.side_padding | default: 20 }}px;
+    box-sizing: border-box;
+  }
+  #mrf-{{ section.id }} .mrf__heading {
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    font-size: {{ st.heading_size_desktop | default: 32 }}px;
+    line-height: 1.15;
+    text-transform: uppercase;
+    letter-spacing: 0;
+    text-align: center;
+    color: {{ st.text_color | default: '#1a1a1a' }};
+    margin: 0 0 {{ st.heading_gap | default: 60 }}px;
+  }
+  #mrf-{{ section.id }} .mrf__layout {
+    display: grid;
+    grid-template-columns: 1fr {{ st.image_width | default: 434 }}px 1fr;
+    gap: {{ st.column_gap | default: 40 }}px;
+    align-items: stretch;
+  }
+  #mrf-{{ section.id }} .mrf__col {
+    position: relative;
+    min-height: {{ st.image_height | default: 651 }}px;
+  }
+  #mrf-{{ section.id }} .mrf__col--left  { text-align: right; }
+  #mrf-{{ section.id }} .mrf__col--right { text-align: left; }
+  #mrf-{{ section.id }} .mrf__point {
+    position: absolute;
+    width: 100%;
+  }
+  #mrf-{{ section.id }} .mrf__col--left  .mrf__point:nth-child(1) { top: {{ st.l1_top | default: 42 }}%; }
+  #mrf-{{ section.id }} .mrf__col--left  .mrf__point:nth-child(2) { top: {{ st.l2_top | default: 68 }}%; }
+  #mrf-{{ section.id }} .mrf__col--right .mrf__point:nth-child(1) { top: {{ st.r1_top | default: 18 }}%; }
+  #mrf-{{ section.id }} .mrf__col--right .mrf__point:nth-child(2) { top: {{ st.r2_top | default: 50 }}%; }
+  #mrf-{{ section.id }} .mrf__point-h {
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 18px;
+    text-transform: uppercase;
+    letter-spacing: 0;
+    color: {{ st.text_color | default: '#1a1a1a' }};
+    margin: 0 0 6px;
+    padding: 0;
+  }
+  #mrf-{{ section.id }} .mrf__point-d {
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 22px;
+    letter-spacing: 0;
+    color: {{ st.description_color | default: '#444444' }};
+    margin: 0;
+    padding: 0;
+  }
+  #mrf-{{ section.id }} .mrf__image-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  #mrf-{{ section.id }} .mrf__image-wrap img {
+    width: {{ st.image_width | default: 434 }}px;
+    height: {{ st.image_height | default: 651 }}px;
+    object-fit: cover;
+    border-radius: {{ st.image_radius | default: 20 }}px;
+    display: block;
+  }
+  #mrf-{{ section.id }} .mrf__placeholder {
+    width: {{ st.image_width | default: 434 }}px;
+    height: {{ st.image_height | default: 651 }}px;
+    background: #f0f0f0;
+    border-radius: {{ st.image_radius | default: 20 }}px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #mrf-{{ section.id }} .mrf__placeholder svg { width: 50%; height: 50%; opacity: 0.25; }
+
+  @media (max-width: 900px) {
+    #mrf-{{ section.id }} {
+      padding-top: {{ st.padding_top_mobile | default: 48 }}px;
+      padding-bottom: {{ st.padding_bottom_mobile | default: 48 }}px;
+      margin-top: {{ st.margin_top_mobile | default: 0 }}px;
+      margin-bottom: {{ st.margin_bottom_mobile | default: 0 }}px;
+    }
+    #mrf-{{ section.id }} .mrf__layout { grid-template-columns: 1fr; gap: 32px; }
+    #mrf-{{ section.id }} .mrf__image-wrap { order: 1; }
+    #mrf-{{ section.id }} .mrf__col--left  { text-align: left; order: 2; min-height: unset; }
+    #mrf-{{ section.id }} .mrf__col--right { order: 3; min-height: unset; }
+    #mrf-{{ section.id }} .mrf__point { position: static; width: auto; margin-bottom: 28px; }
+    #mrf-{{ section.id }} .mrf__point:last-child { margin-bottom: 0; }
+    #mrf-{{ section.id }} .mrf__image-wrap img,
+    #mrf-{{ section.id }} .mrf__placeholder {
+      width: 100%;
+      max-width: {{ st.image_width | default: 434 }}px;
+      height: auto;
+      aspect-ratio: {{ st.image_width | default: 434 }} / {{ st.image_height | default: 651 }};
+    }
+    #mrf-{{ section.id }} .mrf__heading {
+      font-size: {{ st.heading_size_mobile | default: 24 }}px;
+      line-height: 1.15;
+    }
+  }
+  @media (max-width: 640px) {
+    #mrf-{{ section.id }} .mrf__inner { padding-left: 16px; padding-right: 16px; }
+    #mrf-{{ section.id }} .mrf__heading { font-size: {{ st.heading_size_mobile | default: 22 }}px; line-height: 26px; margin-bottom: 28px; }
+    #mrf-{{ section.id }} .mrf__point-h { font-size: 20px; line-height: 18px; }
+    #mrf-{{ section.id }} .mrf__point-d { font-size: 15px; line-height: 20px; }
+    #mrf-{{ section.id }} .mrf__point { margin-bottom: 20px; }
+    #mrf-{{ section.id }} .mrf__image-wrap img,
+    #mrf-{{ section.id }} .mrf__placeholder { border-radius: 14px; }
+  }
+</style>
+
+<section id="mrf-{{ section.id }}">
+  <div class="mrf__inner">
+    {%- if st.heading != blank -%}
+      <h2 class="mrf__heading">{{ st.heading }}</h2>
+    {%- endif -%}
+
+    <div class="mrf__layout">
+      <div class="mrf__col mrf__col--left">
+        <div class="mrf__point">
+          {%- if st.l1_title != blank -%}<p class="mrf__point-h">{{ st.l1_title }}</p>{%- endif -%}
+          {%- if st.l1_desc  != blank -%}<p class="mrf__point-d">{{ st.l1_desc }}</p>{%- endif -%}
+        </div>
+        <div class="mrf__point">
+          {%- if st.l2_title != blank -%}<p class="mrf__point-h">{{ st.l2_title }}</p>{%- endif -%}
+          {%- if st.l2_desc  != blank -%}<p class="mrf__point-d">{{ st.l2_desc }}</p>{%- endif -%}
+        </div>
+      </div>
+
+      <div class="mrf__image-wrap">
+        {%- if st.image != blank -%}
+          {{
+            st.image
+            | image_url: width: 868
+            | image_tag: loading: 'lazy', alt: st.heading
+          }}
+        {%- else -%}
+          <div class="mrf__placeholder">{{ 'product-1' | placeholder_svg_tag }}</div>
+        {%- endif -%}
+      </div>
+
+      <div class="mrf__col mrf__col--right">
+        <div class="mrf__point">
+          {%- if st.r1_title != blank -%}<p class="mrf__point-h">{{ st.r1_title }}</p>{%- endif -%}
+          {%- if st.r1_desc  != blank -%}<p class="mrf__point-d">{{ st.r1_desc }}</p>{%- endif -%}
+        </div>
+        <div class="mrf__point">
+          {%- if st.r2_title != blank -%}<p class="mrf__point-h">{{ st.r2_title }}</p>{%- endif -%}
+          {%- if st.r2_desc  != blank -%}<p class="mrf__point-d">{{ st.r2_desc }}</p>{%- endif -%}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Multipurpose Refills",
+  "tag": "section",
+  "class": "multipurpose-refills-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Multipurpose Refills"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Center image"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Heading / point title color",
+      "default": "#1a1a1a"
+    },
+    {
+      "type": "color",
+      "id": "description_color",
+      "label": "Description color",
+      "default": "#444444"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "label": "Max width (px)",
+      "min": 800,
+      "max": 1600,
+      "step": 20,
+      "default": 1200
+    },
+    {
+      "type": "range",
+      "id": "side_padding",
+      "label": "Side padding (px)",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "column_gap",
+      "label": "Column gap (px)",
+      "min": 12,
+      "max": 100,
+      "step": 2,
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "image_width",
+      "label": "Image width (px)",
+      "min": 280,
+      "max": 700,
+      "step": 4,
+      "default": 434
+    },
+    {
+      "type": "range",
+      "id": "image_height",
+      "label": "Image height (px)",
+      "min": 300,
+      "max": 900,
+      "step": 4,
+      "default": 651
+    },
+    {
+      "type": "range",
+      "id": "image_radius",
+      "label": "Image border radius (px)",
+      "min": 0,
+      "max": 40,
+      "step": 1,
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "range",
+      "id": "heading_size_desktop",
+      "label": "Heading size – Desktop (px)",
+      "min": 18,
+      "max": 56,
+      "step": 1,
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "heading_size_mobile",
+      "label": "Heading size – Mobile (px)",
+      "min": 14,
+      "max": 36,
+      "step": 1,
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "heading_gap",
+      "label": "Gap below heading (px)",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "default": 60
+    },
+    {
+      "type": "header",
+      "content": "Padding & margin – Desktop"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding – Desktop (px)",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding – Desktop (px)",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "margin_top_desktop",
+      "label": "Top margin – Desktop (px)",
+      "min": -100,
+      "max": 100,
+      "step": 4,
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_desktop",
+      "label": "Bottom margin – Desktop (px)",
+      "min": -100,
+      "max": 100,
+      "step": 4,
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Padding & margin – Mobile"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "label": "Top padding – Mobile (px)",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "label": "Bottom padding – Mobile (px)",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "margin_top_mobile",
+      "label": "Top margin – Mobile (px)",
+      "min": -80,
+      "max": 80,
+      "step": 4,
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_mobile",
+      "label": "Bottom margin – Mobile (px)",
+      "min": -80,
+      "max": 80,
+      "step": 4,
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Left Point 1"
+    },
+    {
+      "type": "range",
+      "id": "l1_top",
+      "label": "Vertical position (%)",
+      "min": 0,
+      "max": 90,
+      "step": 1,
+      "default": 42
+    },
+    {
+      "type": "text",
+      "id": "l1_title",
+      "label": "Heading",
+      "default": "Depth"
+    },
+    {
+      "type": "textarea",
+      "id": "l1_desc",
+      "label": "Description",
+      "default": "Fresh, woody & long-lasting (aka 'The Heavyweight')"
+    },
+    {
+      "type": "header",
+      "content": "Left Point 2"
+    },
+    {
+      "type": "range",
+      "id": "l2_top",
+      "label": "Vertical position (%)",
+      "min": 0,
+      "max": 90,
+      "step": 1,
+      "default": 68
+    },
+    {
+      "type": "text",
+      "id": "l2_title",
+      "label": "Heading",
+      "default": "Longevity"
+    },
+    {
+      "type": "textarea",
+      "id": "l2_desc",
+      "label": "Description",
+      "default": "Lasts all day without reapplication"
+    },
+    {
+      "type": "header",
+      "content": "Right Point 1"
+    },
+    {
+      "type": "range",
+      "id": "r1_top",
+      "label": "Vertical position (%)",
+      "min": 0,
+      "max": 90,
+      "step": 1,
+      "default": 18
+    },
+    {
+      "type": "text",
+      "id": "r1_title",
+      "label": "Heading",
+      "default": "Versatility"
+    },
+    {
+      "type": "textarea",
+      "id": "r1_desc",
+      "label": "Description",
+      "default": "Works on hair, body & fabric — one bottle, everything"
+    },
+    {
+      "type": "header",
+      "content": "Right Point 2"
+    },
+    {
+      "type": "range",
+      "id": "r2_top",
+      "label": "Vertical position (%)",
+      "min": 0,
+      "max": 90,
+      "step": 1,
+      "default": 50
+    },
+    {
+      "type": "text",
+      "id": "r2_title",
+      "label": "Heading",
+      "default": "Purity"
+    },
+    {
+      "type": "textarea",
+      "id": "r2_desc",
+      "label": "Description",
+      "default": "Clean ingredients, no harsh chemicals"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Multipurpose Refills"
+    }
+  ]
+}
+{% endschema %}

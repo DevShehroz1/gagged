@@ -1,52 +1,54 @@
 /*
-* ------------------------------------------------------------
-* IMPORTANT: The contents of this file are auto-generated.
-*
-* This file may be updated by the Shopify admin theme editor
-* or related systems. Please exercise caution as any changes
-* made to this file may be overwritten.
-* ------------------------------------------------------------
-*/
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "name": "t:sections.header.name",
   "type": "header",
   "sections": {
-    "top_bar_CbXNYj": {
-      "type": "top-bar",
+    "announcement_bar_Nhj4UU": {
+      "type": "announcement-bar",
       "blocks": {
-        "text_slider_LFaC38": {
-          "type": "text_slider",
+        "announcement_msg2": {
+          "type": "announcement",
           "settings": {
-            "text1": "Sign up for 10% off your first order. <a href=\"\/account\/\" title=\"\/account\/\"><strong>Sign Up<\/strong><\/a>",
-            "text2": "Summer sale discount off 50%. <a href=\"\/collections\/activewear\" title=\"Activewear\"><strong>Shop Sale<\/strong><\/a>",
-            "text3": "Coats—every friday 75% Off . <a href=\"\/collections\/blazers\" title=\"Blazers\"><strong>Shop Sale<\/strong><\/a>",
-            "change_every": 3,
-            "hidden_on_mobile": false
+            "text": "Enjoy free shipping on orders above ₹799.",
+            "countdown_deadline": ""
           }
         },
-        "cur_lang_aPwfT9": {
-          "type": "cur_lang",
+        "announcement_fjngXW": {
+          "type": "announcement",
           "settings": {
-            "menu_link": "menu-topbar",
-            "show_currency": true,
-            "show_language": false,
-            "show_our_store": true,
-            "hidden_on_mobile": true
+            "text": "Enjoy free shipping on orders above ₹799.",
+            "countdown_deadline": ""
           }
         }
       },
       "block_order": [
-        "text_slider_LFaC38",
-        "cur_lang_aPwfT9"
+        "announcement_msg2",
+        "announcement_fjngXW"
       ],
+      "name": "t:sections.announcement-bar.name",
       "settings": {
-        "section_width": "stretch_width",
-        "color_scheme": "scheme-4faf0e4d-27f4-4d02-bc51-617383bab1a9",
+        "section_width": "full_width",
+        "color_scheme": "scheme-lavender-announcement",
+        "announcement_actions": "marquee",
+        "show_close": false,
+        "homepage_only": false,
         "show_mobile": true,
         "show_separator_line": false,
         "uppercase": false,
         "font_size": 13,
         "font_weight": "body_weight",
+        "speed": 15,
+        "space_between": 50,
+        "icon_between_item": "star",
+        "change_every": 3,
         "padding_top": 10,
         "padding_bottom": 10
       }
@@ -100,8 +102,7 @@
             "full_width": true,
             "promotion_position": "right",
             "promotion_image_width": 33,
-            "promotion_image_1": "shopify:\/\/shop_images\/fashion_1.jpg",
-            "promotion_link_1": "shopify:\/\/collections\/activewear",
+            "promotion_link_1": "shopify://collections/activewear",
             "promotion_link_newtab_1": true,
             "promotion_link_2": "",
             "promotion_link_newtab_2": true
@@ -121,12 +122,13 @@
         "enable_login_popup": true,
         "sticky_header_type": "always",
         "sticky_header_mobile": true,
-        "transparent_header": false,
-        "transparent_mobile": false,
-        "transparent_text_icon_color": "#ffffff",
-        "mega_menu": "main-menu",
+        "transparent_header": true,
+        "transparent_mobile": true,
+        "transparent_text_icon_color": "#111111",
+        "mega_menu": "home",
+        "mobile_menu": "mobile-menu",
         "dropdowns_animation": "down-to-up",
-        "uppercase_first": false,
+        "uppercase_first": true,
         "hot": "Hot",
         "label_color_hot": "#ffffff",
         "label_background_hot": "#d0473e",
@@ -137,32 +139,24 @@
         "label_color_sale": "#ffffff",
         "label_background_sale": "#d0473e",
         "redirect_to_link": false,
-        "menu_tab": "custom-collections",
-        "collection_list": [
-          "hot-deals",
-          "best-seller",
-          "sweaters",
-          "t-shirts",
-          "dress",
-          "blazers",
-          "activewear"
-        ],
+        "menu_tab": "unset",
+        "collection_list": [],
         "menu_mobile_color": "#ffffff",
         "menu_mobile_background": "#d0473e",
-        "show_search": true,
+        "show_search": false,
         "show_account_icon": true,
-        "show_wishlist_icon": true,
+        "show_wishlist_icon": false,
         "show_shopping_cart": true,
         "show_currency": false,
         "show_language": false,
         "show_recently_viewed": false,
-        "padding_top": 10,
-        "padding_bottom": 10
+        "padding_top": 15,
+        "padding_bottom": 15
       }
     }
   },
   "order": [
-    "top_bar_CbXNYj",
+    "announcement_bar_Nhj4UU",
     "header"
   ]
 }

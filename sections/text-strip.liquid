@@ -1,0 +1,229 @@
+{%- liquid
+  assign sec_st = section.settings
+-%}
+{% style %}
+  #shopify-section-{{ section.id }} {
+    margin-top: {{ sec_st.margin_top | default: 0 }}px;
+    margin-bottom: {{ sec_st.margin_bottom | default: 0 }}px;
+    display: block;
+  }
+  @media (max-width: 767.98px) {
+    #shopify-section-{{ section.id }} {
+      margin-top: {{ sec_st.margin_top_mobile | default: 0 }}px;
+      margin-bottom: {{ sec_st.margin_bottom_mobile | default: 0 }}px;
+    }
+  }
+{% endstyle %}
+<style>
+  #text-strip-{{ section.id }} {
+    background-color: {{ sec_st.bg_color | default: '#363b48' }};
+    color: {{ sec_st.text_color | default: '#fff8b8' }};
+    text-align: center;
+    padding-top: {{ sec_st.padding_top | default: 16 }}px;
+    padding-bottom: {{ sec_st.padding_bottom | default: 16 }}px;
+    padding-left: {{ sec_st.side_padding | default: 24 }}px;
+    padding-right: {{ sec_st.side_padding | default: 24 }}px;
+  }
+  #text-strip-{{ section.id }} .ts__text {
+    font-family: 'Inter', var(--body-font), sans-serif;
+    font-weight: {{ sec_st.font_weight | default: 700 }};
+    font-size: {{ sec_st.font_size | default: 16 }}px;
+    line-height: 1.3;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin: 0;
+    color: inherit;
+  }
+  @media (max-width: 767.98px) {
+    #text-strip-{{ section.id }} {
+      padding-top: {{ sec_st.padding_top_mobile | default: 12 }}px;
+      padding-bottom: {{ sec_st.padding_bottom_mobile | default: 12 }}px;
+      padding-left: {{ sec_st.side_padding_mobile | default: 16 }}px;
+      padding-right: {{ sec_st.side_padding_mobile | default: 16 }}px;
+    }
+    #text-strip-{{ section.id }} .ts__text {
+      font-size: {{ sec_st.font_size_mobile | default: 13 }}px;
+    }
+  }
+</style>
+
+<div id="text-strip-{{ section.id }}">
+  {%- if sec_st.text != blank -%}
+    <p class="ts__text">{{ sec_st.text | escape }}</p>
+  {%- endif -%}
+</div>
+
+{% schema %}
+{
+  "name": "Text Strip",
+  "tag": "section",
+  "disabled_on": {
+    "groups": ["header", "footer", "custom.overlay"]
+  },
+  "settings": [
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background color",
+      "default": "#363b48"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#fff8b8"
+    },
+    {
+      "type": "text",
+      "id": "text",
+      "label": "Text",
+      "default": "BUILT FOR HEAT. BUILT FOR MOVEMENT."
+    },
+    {
+      "type": "select",
+      "id": "font_weight",
+      "label": "Font weight",
+      "default": "700",
+      "options": [
+        { "value": "400", "label": "Regular" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semibold" },
+        { "value": "700", "label": "Bold" }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "font_size",
+      "label": "Font size (desktop)",
+      "default": 16,
+      "min": 10,
+      "max": 36,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "font_size_mobile",
+      "label": "Font size (mobile)",
+      "default": 13,
+      "min": 10,
+      "max": 28,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top (desktop)",
+      "default": 16,
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom (desktop)",
+      "default": 16,
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "side_padding",
+      "label": "Side padding (desktop)",
+      "default": 24,
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "label": "Padding top (mobile)",
+      "default": 12,
+      "min": 0,
+      "max": 80,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom (mobile)",
+      "default": 12,
+      "min": 0,
+      "max": 80,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "side_padding_mobile",
+      "label": "Side padding (mobile)",
+      "default": 16,
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Margins"
+    },
+    {
+      "type": "range",
+      "id": "margin_top",
+      "label": "Margin top (desktop)",
+      "default": 0,
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom",
+      "label": "Margin bottom (desktop)",
+      "default": 0,
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "margin_top_mobile",
+      "label": "Margin top (mobile)",
+      "default": 0,
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_mobile",
+      "label": "Margin bottom (mobile)",
+      "default": 0,
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "unit": "px"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Text Strip"
+    }
+  ]
+}
+{% endschema %}

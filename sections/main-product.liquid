@@ -1,4 +1,132 @@
 {{ 'main-product.css' | asset_url | stylesheet_tag }}
+<style>
+  /* Product title */
+  .product-detail__title {
+    font-family: 'Inter', var(--heading-font), sans-serif !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: -0.01em !important;
+    font-size: clamp(32px, 4vw, 48px) !important;
+    line-height: 1.05 !important;
+  }
+
+  /* Add to Cart button */
+  .product-form__buttons .product-form__submit,
+  .product-form__buttons .product_submit_button {
+    border-radius: 999px !important;
+    font-family: 'Inter', var(--heading-font), sans-serif !important;
+    font-weight: 500 !important;
+    font-size: 14px !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase !important;
+    padding: 20px 30px !important;
+    min-height: 60px !important;
+  }
+
+  /* Buy It Now button */
+  .shopify-payment-button .shopify-payment-button__button {
+    border-radius: 999px !important;
+    font-family: 'Inter', var(--heading-font), sans-serif !important;
+    font-weight: 500 !important;
+    font-size: 14px !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase !important;
+    min-height: 60px !important;
+    border: 1.5px solid #000 !important;
+    background: #fff !important;
+    color: #000 !important;
+  }
+  .shopify-payment-button .shopify-payment-button__button:hover {
+    background: #f5f5f5 !important;
+  }
+  .shopify-payment-button .shopify-payment-button__button--hidden { display: none !important; }
+
+  /* Quantity selector */
+  .product-form__quantity .quantity,
+  .product-form__quantity select,
+  .product-form__quantity quantity-input {
+    border-radius: 999px !important;
+  }
+  .product-form__quantity select {
+    border-radius: 999px !important;
+    border: 1.5px solid #000 !important;
+    padding: 12px 40px 12px 20px !important;
+    min-height: 50px !important;
+    font-family: 'Inter', var(--heading-font), sans-serif !important;
+    font-size: 14px !important;
+  }
+
+  /* Color/Quantity labels */
+  .product-detail__information .variant-wrapper label,
+  .product-detail__information .product-form__quantity > label,
+  .product-detail__information .option-heading {
+    font-family: 'Inter', var(--heading-font), sans-serif !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.02em !important;
+  }
+
+  /* Color swatches */
+  .product__color-swatch {
+    width: 40px !important;
+    height: 40px !important;
+    border: 1.5px solid #ddd !important;
+    border-radius: 50% !important;
+  }
+  .product__color-swatch.current-filter,
+  .product__color-swatch:checked + label,
+  .product__color-swatch.active {
+    border-color: #000 !important;
+    border-width: 2px !important;
+  }
+
+  /* Collapsible / Accordion sections */
+  .product-detail__information .bls-toggle,
+  .product-detail__information collapsible-block {
+    background: #f2f2f2 !important;
+    border-radius: 14px !important;
+    border: none !important;
+    margin-bottom: 8px !important;
+    padding: 4px 20px !important;
+    overflow: hidden !important;
+  }
+  .product-detail__information .bls-toggle .collapsible-heading,
+  .product-detail__information collapsible-block .collapsible-heading {
+    font-family: 'Inter', var(--heading-font), sans-serif !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.02em !important;
+    border: none !important;
+    border-bottom: none !important;
+  }
+  .product-detail__information .bls-toggle .collapsible-content,
+  .product-detail__information collapsible-block .collapsible-content {
+    border: none !important;
+  }
+
+  /* Price styling */
+  .product-detail__information .price {
+    font-family: 'Inter', var(--heading-font), sans-serif !important;
+    font-weight: 500 !important;
+    font-size: 22px !important;
+  }
+
+  @media (max-width: 767px) {
+    .product-detail__title {
+      font-size: 28px !important;
+    }
+    .product-form__buttons .product-form__submit,
+    .product-form__buttons .product_submit_button {
+      min-height: 54px !important;
+      padding: 16px 24px !important;
+    }
+    .shopify-payment-button .shopify-payment-button__button {
+      min-height: 54px !important;
+    }
+  }
+</style>
 {%- liquid
   assign theme_st = settings
   assign section_st = section.settings

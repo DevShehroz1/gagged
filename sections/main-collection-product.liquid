@@ -1,4 +1,15 @@
 {{ 'collection-page.css' | asset_url | stylesheet_tag }}
+<style>
+  .collection-hero-banner { grid-column: span 2 !important; order: -1 !important; }
+  @media (max-width: 767px) {
+    .collection-hero-banner { grid-column: span 1 !important; order: -1 !important; }
+    .collection-hero-banner .collection-hero-banner__inner { min-height: 300px !important; }
+    .collection-hero-banner .collection-hero-banner__inner div span {
+      font-size: 22px !important;
+      line-height: 26px !important;
+    }
+  }
+</style>
 {% # theme-check-disable ContentForHeaderModification %}
 {%- capture content_for_query_string -%}
   {{ content_for_header }}
@@ -164,6 +175,30 @@
                   assign midnum = section_st.items_to_show | times: cp
                   assign found = false
                 -%}
+                {%- if section_st.collection_banner_image != blank and view != 'list' and paginate.current_page == 1 -%}
+                  <div class="grid__item collection-hero-banner" style="grid-column: span 2; order: -1;">
+                    <a
+                      {% if section_st.collection_banner_link != blank %}href="{{ section_st.collection_banner_link }}"{% else %}role="link" aria-disabled="true"{% endif %}
+                      class="collection-hero-banner__inner"
+                      style="display: block; position: relative; width: 100%; height: 100%; min-height: 434px; border-radius: 14px; overflow: hidden; text-decoration: none;"
+                    >
+                      <img
+                        src="{{ section_st.collection_banner_image | image_url: width: 1320 }}"
+                        srcset="{{ section_st.collection_banner_image | image_url: width: 660 }} 660w, {{ section_st.collection_banner_image | image_url: width: 1000 }} 1000w, {{ section_st.collection_banner_image | image_url: width: 1320 }} 1320w"
+                        sizes="(max-width: 767px) 100vw, 50vw"
+                        alt="{{ section_st.collection_banner_text | escape }}"
+                        loading="eager"
+                        style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block;"
+                      >
+                      <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0) 60%); pointer-events: none;"></div>
+                      {%- if section_st.collection_banner_text != blank -%}
+                        <div style="position: absolute; bottom: 28px; left: 28px; right: 28px; z-index: 1;">
+                          <span style="font-family: 'Inter', var(--heading-font), sans-serif; font-weight: 500; font-size: 30px; line-height: 34px; letter-spacing: 0; text-transform: uppercase; color: #fff; display: block;">{{ section_st.collection_banner_text }}</span>
+                        </div>
+                      {%- endif -%}
+                    </a>
+                  </div>
+                {%- endif -%}
                 {%- for product in collection.products -%}
                   {%- liquid
                     assign index = forloop.index0 | plus: 1 | plus: midnum
@@ -430,6 +465,26 @@
       "id": "button_show_more",
       "label": "t:sections.collections-list-page.settings.pagination.button_show_more",
       "default": "Show more"
+    },
+    {
+      "type": "header",
+      "content": "Collection Banner"
+    },
+    {
+      "type": "image_picker",
+      "id": "collection_banner_image",
+      "label": "Banner image"
+    },
+    {
+      "type": "text",
+      "id": "collection_banner_text",
+      "label": "Banner text",
+      "default": "OUR ONE CASE. YOUR FIRST SCENT. EVERYTHING ELSE FOLLOWS."
+    },
+    {
+      "type": "url",
+      "id": "collection_banner_link",
+      "label": "Banner link"
     },
     {
       "type": "header",

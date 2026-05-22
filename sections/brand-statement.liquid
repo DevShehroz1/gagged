@@ -1,0 +1,441 @@
+{%- liquid
+  assign sec_st = section.settings
+  if sec_st.reset_spacing
+    assign reset_spacing = ' remove_spacing'
+  endif
+
+  assign heading_anchor_prop  = 'top'
+  assign heading_anchor_val   = sec_st.heading_top
+  if sec_st.heading_anchor == 'bottom'
+    assign heading_anchor_prop = 'bottom'
+    assign heading_anchor_val  = sec_st.heading_bottom
+  endif
+
+  assign desc_anchor_prop = 'top'
+  assign desc_anchor_val  = sec_st.desc_top
+  if sec_st.desc_anchor == 'bottom'
+    assign desc_anchor_prop = 'bottom'
+    assign desc_anchor_val  = sec_st.desc_bottom
+  endif
+-%}
+
+<div
+  class="brand-statement{{ reset_spacing }}"
+  style="background-color: {{ sec_st.bg_color }}; padding-top: {{ sec_st.padding_top }}px; padding-bottom: {{ sec_st.padding_bottom }}px;"
+>
+  <div class="brand-statement__inner">
+
+    {%- comment -%} Image {%- endcomment -%}
+    <div class="brand-statement__media">
+      {%- if sec_st.image != blank -%}
+        {%- assign image_alt = sec_st.image.alt | default: 'Brand image' -%}
+        {{
+          sec_st.image
+          | image_url: width: 1320
+          | image_tag:
+            loading: 'lazy',
+            alt: image_alt,
+            class: 'brand-statement__img',
+            widths: '660, 990, 1320',
+            sizes: '(max-width: 767px) 100vw, 660px'
+        }}
+      {%- else -%}
+        {{ 'image' | placeholder_svg_tag: 'brand-statement__img brand-statement__img--placeholder' }}
+      {%- endif -%}
+    </div>
+
+    {%- comment -%} Heading — independently positioned, overlaps image by default {%- endcomment -%}
+    {%- if sec_st.heading != blank -%}
+      <div
+        class="brand-statement__heading-wrap"
+        style="
+          left: {{ sec_st.heading_left }}px;
+          {{ heading_anchor_prop }}: {{ heading_anchor_val }}px;
+          max-width: {{ sec_st.heading_max_width }}px;
+          text-align: {{ sec_st.heading_align }};
+        "
+      >
+        <h2 class="brand-statement__heading" style="color: {{ sec_st.heading_color }};">
+          {{ sec_st.heading }}
+        </h2>
+      </div>
+    {%- endif -%}
+
+    {%- comment -%} Description — independently positioned {%- endcomment -%}
+    {%- if sec_st.description != blank -%}
+      <div
+        class="brand-statement__desc-wrap"
+        style="
+          left: {{ sec_st.desc_left }}px;
+          {{ desc_anchor_prop }}: {{ desc_anchor_val }}px;
+          max-width: {{ sec_st.desc_max_width }}px;
+          text-align: {{ sec_st.desc_align }};
+        "
+      >
+        <p class="brand-statement__desc" style="color: {{ sec_st.desc_color }};">
+          {{ sec_st.description }}
+        </p>
+      </div>
+    {%- endif -%}
+
+  </div>
+</div>
+
+{% style %}
+  #shopify-section-{{ section.id }} .brand-statement {
+    overflow: hidden;
+  }
+
+  /* Section container — everything is absolutely positioned inside */
+  #shopify-section-{{ section.id }} .brand-statement__inner {
+    position: relative;
+    height: {{ sec_st.section_height }}px;
+  }
+
+  /* Image */
+  #shopify-section-{{ section.id }} .brand-statement__media {
+    position: absolute;
+    left: {{ sec_st.image_left }}px;
+    top: {{ sec_st.image_top }}px;
+    width: 660px;
+    height: 600px;
+  }
+  #shopify-section-{{ section.id }} .brand-statement__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 14px;
+    display: block;
+  }
+  #shopify-section-{{ section.id }} .brand-statement__img--placeholder {
+    width: 100%;
+    height: 100%;
+    background: #ccc;
+    border-radius: 14px;
+  }
+
+  /* Heading wrapper — absolutely positioned, default overlaps image */
+  #shopify-section-{{ section.id }} .brand-statement__heading-wrap {
+    position: absolute;
+    right: 0;
+  }
+  #shopify-section-{{ section.id }} .brand-statement__heading {
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 34px;
+    line-height: 38px;
+    letter-spacing: 0;
+    margin: 0;
+  }
+
+  /* Description wrapper — absolutely positioned independently */
+  #shopify-section-{{ section.id }} .brand-statement__desc-wrap {
+    position: absolute;
+  }
+  #shopify-section-{{ section.id }} .brand-statement__desc {
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 24px;
+    letter-spacing: 0;
+    margin: 0;
+  }
+
+  /* Mobile */
+  @media screen and (max-width: 767px) {
+    #shopify-section-{{ section.id }} .brand-statement__inner {
+      position: static;
+      height: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    #shopify-section-{{ section.id }} .brand-statement__media {
+      position: static;
+      width: 100%;
+      height: 320px;
+    }
+    #shopify-section-{{ section.id }} .brand-statement__img {
+      border-radius: 0;
+      height: 320px;
+    }
+    #shopify-section-{{ section.id }} .brand-statement__heading-wrap,
+    #shopify-section-{{ section.id }} .brand-statement__desc-wrap {
+      position: static;
+      max-width: 100% !important;
+      left: auto !important;
+      top: auto !important;
+      bottom: auto !important;
+      right: auto !important;
+      text-align: left !important;
+    }
+    #shopify-section-{{ section.id }} .brand-statement__heading-wrap {
+      padding: 32px 20px 16px;
+    }
+    #shopify-section-{{ section.id }} .brand-statement__desc-wrap {
+      padding: 0 20px 40px;
+    }
+    #shopify-section-{{ section.id }} .brand-statement__heading {
+      font-size: 24px;
+      line-height: 32px;
+    }
+    #shopify-section-{{ section.id }} .brand-statement__desc {
+      font-size: 16px;
+      line-height: 22px;
+    }
+  }
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "Brand Statement",
+  "tag": "section",
+  "disabled_on": {
+    "groups": ["header", "footer", "custom.overlay"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "Section Height (Desktop)"
+    },
+    {
+      "type": "range",
+      "id": "section_height",
+      "label": "Height",
+      "default": 700,
+      "min": 400,
+      "max": 1000,
+      "step": 10,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "range",
+      "id": "image_left",
+      "label": "Left offset",
+      "default": 50,
+      "min": 0,
+      "max": 300,
+      "step": 5,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "image_top",
+      "label": "Top offset",
+      "default": 100,
+      "min": 0,
+      "max": 300,
+      "step": 5,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading text",
+      "default": "A functional personal care brand that prioritises body care for people who actually move through their day."
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#1a1a1a"
+    },
+    {
+      "type": "range",
+      "id": "heading_left",
+      "label": "Left offset (overlaps image when < image width)",
+      "default": 190,
+      "min": 0,
+      "max": 900,
+      "step": 5,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "heading_max_width",
+      "label": "Max width",
+      "default": 800,
+      "min": 200,
+      "max": 1200,
+      "step": 10,
+      "unit": "px"
+    },
+    {
+      "type": "select",
+      "id": "heading_anchor",
+      "label": "Anchor from",
+      "default": "top",
+      "options": [
+        { "value": "top",    "label": "Top" },
+        { "value": "bottom", "label": "Bottom" }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "heading_top",
+      "label": "Top offset",
+      "default": 50,
+      "min": 0,
+      "max": 600,
+      "step": 5,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "heading_bottom",
+      "label": "Bottom offset",
+      "default": 60,
+      "min": 0,
+      "max": 600,
+      "step": 5,
+      "unit": "px"
+    },
+    {
+      "type": "select",
+      "id": "heading_align",
+      "label": "Text alignment",
+      "default": "left",
+      "options": [
+        { "value": "left",   "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right",  "label": "Right" }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Description"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description text",
+      "default": "Your skin doesn't stop working just because your deodorant did. It sweats. It reacts. It absorbs whatever you put on it, good or bad. Summ was built around functional fragrances that interact with the skin instead of sitting on top of it."
+    },
+    {
+      "type": "color",
+      "id": "desc_color",
+      "label": "Description color",
+      "default": "#1a1a1a"
+    },
+    {
+      "type": "range",
+      "id": "desc_left",
+      "label": "Left offset",
+      "default": 660,
+      "min": 0,
+      "max": 1200,
+      "step": 5,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "desc_max_width",
+      "label": "Max width",
+      "default": 460,
+      "min": 150,
+      "max": 800,
+      "step": 10,
+      "unit": "px"
+    },
+    {
+      "type": "select",
+      "id": "desc_anchor",
+      "label": "Anchor from",
+      "default": "bottom",
+      "options": [
+        { "value": "top",    "label": "Top" },
+        { "value": "bottom", "label": "Bottom" }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "desc_top",
+      "label": "Top offset",
+      "default": 60,
+      "min": 0,
+      "max": 600,
+      "step": 5,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "desc_bottom",
+      "label": "Bottom offset",
+      "default": 30,
+      "min": 0,
+      "max": 600,
+      "step": 5,
+      "unit": "px"
+    },
+    {
+      "type": "select",
+      "id": "desc_align",
+      "label": "Text alignment",
+      "default": "left",
+      "options": [
+        { "value": "left",   "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right",  "label": "Right" }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Section Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "default": 0,
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "default": 0,
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px"
+    },
+    {
+      "type": "checkbox",
+      "id": "reset_spacing",
+      "label": "Remove section spacing",
+      "default": false
+    }
+  ],
+  "presets": [
+    {
+      "name": "Brand Statement"
+    }
+  ]
+}
+{% endschema %}

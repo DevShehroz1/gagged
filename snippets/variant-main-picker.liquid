@@ -221,10 +221,29 @@
         {{ product_resource.selected_or_first_available_variant | json }}
       </script>
     </form>
+
+    {%- if product_resource.metafields.custom.sizechart != blank -%}
+      <a
+        href="{{ product_resource.metafields.custom.sizechart }}"
+        class="size-chart-link"
+        target="_blank"
+        rel="noopener"
+      >
+        Size Chart
+      </a>
+    {%- endif -%}
   </variant-picker>
 {% endunless %}
 
 {% stylesheet %}
+  .size-chart-link {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: var(--font-size-sm, 0.875rem);
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
   /* Variant picker container styles - unique to main variant picker */
   .variant-picker {
     width: 100%;
